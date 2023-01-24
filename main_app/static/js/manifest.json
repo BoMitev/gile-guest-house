@@ -1,0 +1,14 @@
+{
+  "name": "GILE Guest House",
+  "short_name": "GILE Guest House",
+  "start_url": "http://94.155.240.35:8000/",
+  "display": "standalone",
+  "icons": [{
+    "src": "/static/img/mobile_favicon.png",
+    "sizes": "120x120",
+    "type": "image/png"
+  }],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff"
+
+}

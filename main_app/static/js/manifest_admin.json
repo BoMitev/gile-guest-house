@@ -1,0 +1,13 @@
+{
+  "name": "GILE Admin",
+  "short_name": "GILE",
+  "start_url": "http://94.155.240.35:8000/admin/",
+  "display": "standalone",
+  "icons": [{
+    "src": "home/static/img/mobile_admin.png",
+    "sizes": "180x180",
+    "type": "image/png"
+  }],
+  "theme_color": "#417690",
+  "background_color": "#417690"
+}

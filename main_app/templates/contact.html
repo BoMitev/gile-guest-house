@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page %}
+    <!-- Contact Section Begin -->
+    <section class="contact-section spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="contact-text">
+                        <h2>{{ page_statics.page.contacts.contact_info }}</h2>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et dolore magna aliqua.</p>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        {{ page_dynamics.footer_contacts|linebreaks }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-7 offset-lg-1">
+                    <form method="post" action="{% url 'contacts' %}" class="contact-form">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <label for="{{ contact_form.name.id_for_label }}">{{ page_statics.page.contacts.contact_form.0 }}</label>
+                                {{ contact_form.name }}
+                            </div>
+                            <div class="col-lg-6">
+                                <label for="{{ contact_form.email.id_for_label }}">{{ page_statics.page.contacts.contact_form.1 }}</label>
+                                {{ contact_form.email }}
+                            </div>
+                            <div class="col-lg-12">
+                                <label for="{{ contact_form.message.id_for_label }}">{{ page_statics.page.contacts.contact_form.2 }}</label>
+                                {{ contact_form.message }}
+                                <button type="submit">{{ page_statics.page.contacts.contact_form.3 }}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="map">
+               <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d728.4873450442581!2d25.63131284815666!3d43.084559551733165!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x1fcc9eadde3eac8!2sGILE%20Guest%20House!5e0!3m2!1sbg!2sbg!4v1670942883026!5m2!1sbg!2sbg" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    </section>
+    {% if message_submited %}
+	<div id="snackbar">{{ page_statics.snackbar.contact }}</div>
+	<script>
+	window.onload = function () {
+    var x = document.getElementById("snackbar");
+  	x.className = "show";
+  	setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+    }
+	</script>
+	{% endif %}
+{% endblock %}

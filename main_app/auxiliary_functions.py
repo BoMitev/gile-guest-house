@@ -1,5 +1,9 @@
+import smtplib
 from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from django.contrib.auth.models import User
+from hotel_gile.settings import SMTP_USER, SMTP_PASSWORD
 from hotel_gile.main_app.api_secrets import api_secrets as secrets
 
 
@@ -31,18 +35,16 @@ def default_check_out():
 
 
 def calculate_reservation_price(reservation):
-    DEFAULT_PRICE_PER_PERSION = 30
-    discount = 1
-    markup = 1
-    if reservation.discount:
-        if reservation.discount > 0:
-            markup = 1 + reservation.discount / 100
-        elif reservation.discount < 0:
-            discount = 1 - abs(reservation.discount) / 100
+    if not reservation.discount:
+        discount = 0
+    else:
+        discount = reservation.discount
 
-    formula = reservation.calc_days * markup * discount * (reservation.room.price -
-                                         (DEFAULT_PRICE_PER_PERSION * reservation.room.price_rate *
-                                          (reservation.room.room_capacity - max(reservation.total_guests, 2))))
+    formula = reservation.calc_days * (reservation.room.price - (reservation.room.discount_per_person *
+                                                                 (reservation.room.room_capacity - max(
+                                                                     reservation.total_guests,
+                                                                     2)))) + discount
+
     return round(formula, 1)
 
 
@@ -71,6 +73,7 @@ def event_template(obj):
         'description': f'{obj.name} / {obj.phone}\n'
                        f'{obj.adults}+{obj.children} човека - {obj.price}лв.\n'
                        f'{check_in_time}'
+                       f'Брой нощувки: {obj.calc_days}\n'
                        f'{obj.description}',
         'colorId': str(obj.room.id),
         'start': {
@@ -104,6 +107,7 @@ def delete_reservation(obj):
     service = secrets.reservation_api_secrets()
     service.events().delete(calendarId='primary', eventId=obj.external_id).execute()
 
+
 # def load_reservations():
 #     service = secrets.reservation_api_secrets()
 #
@@ -136,70 +140,49 @@ def delete_reservation(obj):
 #     return reservations
 
 
-#================ EMAIL ===============
+# ================ EMAIL ===============
 
 def send_confirmation_email(reservation):
-    import base64
-    from email.message import EmailMessage
-    from googleapiclient.discovery import build
-    from googleapiclient.errors import HttpError
-    from google.oauth2.credentials import Credentials
     import hotel_gile.main_app.create_email_template as email
-
-    SCOPES = ['https://mail.google.com/']
-    creds = Credentials.from_authorized_user_file('hotel_gile/main_app/api_secrets/token.json', SCOPES)
-
     try:
-        service = build('gmail', 'v1', credentials=creds)
-        message = EmailMessage()
-
-        content = email.create_email(reservation)
-        message.set_content(content, subtype='html')
-
-        message['To'] = reservation.email
-        message['From'] = 'Guest House GILE<gileood@gmail.com>'
+        session = smtplib.SMTP('mail.gile.house', 25)
+        session.starttls()
+        session.login(SMTP_USER, SMTP_PASSWORD)
+        message = MIMEMultipart('alternative')
         message['Subject'] = f'Потвърдена резервация/ Confirmed reservation'
+        message['From'] = f'Guest House GILE<{SMTP_USER}>'
+        msg = MIMEText(email.create_email(reservation), 'html')
 
-        encoded_message = base64.urlsafe_b64encode(message.as_bytes()) \
-            .decode()
-
-        create_message = {
-            'raw': encoded_message
-        }
-        # pylint: disable=E1101
-        send_message = (service.users().messages().send
-                        (userId="me", body=create_message).execute())
-        print(F'Message Id: {send_message["id"]}')
-    except HttpError as error:
-        print(F'An error occurred: {error}')
-        send_message = None
-    return send_message
+        message.attach(msg)
+        session.sendmail(SMTP_USER, reservation.email, message.as_string())
+        session.quit()
+    except Exception as ex:
+        pass
 
 
 def send_notification_email(reservation):
-    import smtplib
-    from hotel_gile.settings import SMTP_USER, SMTP_PASSWORD
-    from email.mime.text import MIMEText
+    staff_email_list = [x[0] for x in User.objects.filter(is_staff=True).values_list('email') if x[0]]
+    if not staff_email_list:
+        return
 
-    staff_email_list = User.objects.filter(is_staff=True).values_list('email', 'first_name')
-    for (receiver, name) in staff_email_list:
-
-        session = smtplib.SMTP('smtp.gmail.com', 587)
+    try:
+        session = smtplib.SMTP('mail.gile.house', 25)
         session.starttls()
         session.login(SMTP_USER, SMTP_PASSWORD)
-        msg = f"""Здравей, {name}!
-        
-    Получихте нова резервация.
+        msg = f"""Получихте нова резервация.
     Име: {reservation.name},
     Брой гости: {reservation.total_guests},
     От: {reservation.check_in.date()},
     До: {reservation.check_out},
     Нощувки: {reservation.calc_days},
-    Телефон: {reservation.phone},
-    Email: {reservation.email}"""
+    Телефон: {reservation.phone}"""
+        if reservation.email:
+            msg += f",\nEmail: {reservation.email}"
 
         message = MIMEText(msg, 'plain')
         message['Subject'] = "Нова резервация"
         message['From'] = f'* Reservation - Guest House GILE<{SMTP_USER}>'
-        session.sendmail(SMTP_USER, receiver, message.as_string())
+        session.sendmail(SMTP_USER, staff_email_list, message.as_string())
         session.quit()
+    except Exception as ex:
+        pass

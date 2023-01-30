@@ -81,19 +81,19 @@ HEAD = """
 
 def create_email(reservation):
     body = f"""
-    <body style="box-sizing: border-box; margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased;background-color:#f1f1f1">
+    <body style="box-sizing: border-box; margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased;background-color:#f1f1f1; color:#000000;">
   <table class="wrapper all-font-sans" width="100%" height="100%" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td align="center" style="padding: 24px;" width="100%">
         <table class="sm-w-full" width="650" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
             <td colspan="2" class="sm-inline-block" style="display: none;">
-              <img src="https://i.ibb.co/NC0vsFt/361581680.jpg" width="600" alt="Double Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-top-right-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);">
+              <img src="https://gile.house{reservation.room.image.url}" width="600" alt="Double Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-top-right-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);">
             </td>
           </tr>
           <tr>
             <td class="sm-hidden" style="padding-top: 40px; padding-bottom: 40px;" width="160">
-              <img src="https://i.ibb.co/NC0vsFt/361581680.jpg" alt="Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-bottom-left-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);" width="160" height="350">
+              <img src="https://gile.house{reservation.room.image.url}" alt="Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-bottom-left-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);" width="160" height="350">
             </td>
             <td align="left" class="sm-p-20 sm-dui17-b-t" style="border-radius: 2px; padding: 40px; position: relative; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05); vertical-align: top; z-index: 50;" bgcolor="#ffffff" valign="top">
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
@@ -173,11 +173,52 @@ def create_email(reservation):
 					 </td>
                 </tr>
               </table>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+        <tr>
+          <td style="padding-top: 24px;padding-bottom: 12px;">
+            <div style="background-color: #edf2f7; height: 2px; line-height: 2px;">&zwnj;</div>
+          </td>
+        </tr>
+      </table>
+      <table style="line-height: 28px; font-size: 14px;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+        <tr>
+          <td style="font-weight: bold;" colspan="2">Банкови детайли</td>
+        </tr>
+        <tr>
+            <td width="20%" style="color: #718096;">Име:</td>
+            <td>ГИЛЕ ООД</td>
+        </tr>
+        <tr>
+            <td style="color: #718096;">Банка:</td>
+            <td>ДСК</td>
+        </tr>
+        <tr>
+            <td style="color: #718096;">BIC:</td>
+            <td>STSABGSF</td>
+        </tr>
+        <tr>
+            <td style="color: #718096;">IBAN:</td>
+            <td>BG27STSA93001525962185</td>
+        </tr>
+        <tr>
+        
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+        <tr>
+          <td style="padding-top: 24px;padding-bottom: 5px;">
+            <div style="background-color: #edf2f7; height: 2px; line-height: 2px;">&zwnj;</div>
+          </td>
+        </tr>
+        <tr>
+        <td colspan="2" style="line-height:12px; text-align: center;"><sub style="font-size: 12px;">Това е автоматично генерирано съобщение. Моля, не отговаряйте!</sub></td>
+        </tr>
+      </table>
             </td>
           </tr>
 		  <tr>
             <td class="sm-hidden" style="padding-top: 40px; padding-bottom: 40px;" width="160">
-              <img src="https://i.ibb.co/ph7fvky/361616563.jpg" alt="Double room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-bottom-left-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);" width="350">
+              <img src="https://i.ibb.co/ph7fvky/361616563.jpg" alt="Double room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-bottom-left-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);" width="160" height="350">
             </td>
             <td align="left" class="sm-p-20 sm-dui17-b-t" style="border-radius: 2px; padding: 40px; position: relative; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05); vertical-align: top; z-index: 50;" bgcolor="#ffffff" valign="top">
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
@@ -257,7 +298,45 @@ def create_email(reservation):
 					 </td>
                 </tr>
               </table>
-            </td>
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+        <tr>
+          <td style="padding-top: 24px;padding-bottom: 12px;">
+            <div style="background-color: #edf2f7; height: 2px; line-height: 2px;">&zwnj;</div>
+          </td>
+        </tr>
+      </table>
+      <table style="line-height: 28px; font-size: 14px;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+        <tr>
+          <td style="font-weight: bold;" colspan="2">Bank Details</td>
+        </tr>
+        <tr>
+            <td width="20%" style="color: #718096;">Name:</td>
+            <td>GILE OOD</td>
+        </tr>
+        <tr>
+            <td style="color: #718096;">Bank:</td>
+            <td>DSK BANK EAD</td>
+        </tr>
+        <tr>
+            <td style="color: #718096;">BIC:</td>
+            <td>STSABGSF</td>
+        </tr>
+        <tr>
+            <td style="color: #718096;">IBAN:</td>
+            <td>BG27STSA93001525962185</td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+        <tr>
+          <td style="padding-top: 24px;padding-bottom: 5px;">
+            <div style="background-color: #edf2f7; height: 2px; line-height: 2px;">&zwnj;</div>
+          </td>
+        </tr>
+        <tr>
+        <td colspan="2" style="line-height:12px; text-align: center;"><sub style="font-size: 12px;">This is an automated notification email, please do not reply.</sub></td>
+        </tr>
+      </table>
+              </td>
           </tr>
         </table>
       </td>

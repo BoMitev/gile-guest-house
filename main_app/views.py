@@ -7,6 +7,10 @@ import hotel_gile.main_app.language_config as lang_config
 import hotel_gile.main_app.auxiliary_functions as aux_func
 
 
+def view_404(request):
+    return redirect('index')
+
+
 def change_session_language(request):
     if request.session['language'] == 'bg':
         request.session['language'] = 'en'

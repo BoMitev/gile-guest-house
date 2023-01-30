@@ -28,12 +28,13 @@
                     <div class="room-item">
                         <img src="{{ room.image.url }}" alt="">
                         <div class="ri-text">
-                            <h4>{% if language == 'bg' %}
-                                	{{ room.title }}
+                            {% if language == 'bg' %}
+                            <h4>{{ room.title }}</h4>
+                                <h3>{% if room.min_price < room.price %}<span>от </span>{{ room.min_price }}<span> до </span>{% endif %}{{ room.price }}<span> лв/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
 								{% else %}
-									{{ room.title_en }}
-								{% endif %}</h4>
-                            <h3>{{ room.price }}<span> лв/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
+                                <h4>{{ room.title_en }}</h4>
+                                <h3>{% if room.min_price < room.price %}<span>from </span>{{ room.min_price }}<span> to </span>{% endif %}{{ room.price }}<span> BGN/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
+								{% endif %}
                              <table>
                                     <tbody>
                                         <tr>
@@ -48,9 +49,9 @@
                                             <td class="r-o">{{ page_statics.page.rooms.rooms_terms.4 }}:</td>
                                             <td>
 												{% if language == 'bg' %}
-													{{ room.room_services|truncatechars:48 }}
+													{{ room.room_services }}
 												{% else %}
-													{{ room.room_services_en|truncatechars:48 }}
+													{{ room.room_services_en}}
 												{% endif %}
 											</td>
                                         </tr>

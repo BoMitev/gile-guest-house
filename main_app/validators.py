@@ -26,3 +26,5 @@ def is_room_busy(is_room_busy):
             "room": f"* Стая {is_room_busy.room_id} е заета от {is_room_busy.check_in.date()} до {is_room_busy.check_out}",
             "check_in": "",
             "check_out": ""})
+
+

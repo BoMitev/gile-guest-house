@@ -1,10 +1,12 @@
 from datetime import datetime
+import locale
 from django.contrib import admin
 from django.db import models
 from django.db.models import Q
 from django.utils.safestring import mark_safe
 import hotel_gile.main_app.validators as validators
 import hotel_gile.main_app.auxiliary_functions as af
+from hotel_gile.settings import ADMIN_LIST_DISPLAY_DATETIME_FORMAT, ADMIN_LIST_DISPLAY_DATE_FORMAT
 
 BOOL_CHOICES = ((True, 'Да'), (False, 'Не'))
 
@@ -24,7 +26,7 @@ class HeroGallery(models.Model):
     @property
     def thumbnail_preview(self):
         if self.image:
-            return mark_safe('<img src="{}" width="250" alt="Няма снимка" />'.format(self.image.url))
+            return mark_safe(f'<img src="{self.image.url}" width="250" height="250" style="object-fit: cover;" alt="Няма снимка" />')
         return ""
     thumbnail_preview.fget.short_description = 'Преглед'
 
@@ -36,12 +38,13 @@ class Room(models.Model):
     id = models.IntegerField(primary_key=True, verbose_name="Номер на стая")
     room_title = models.CharField(max_length=100, verbose_name="Име на стая")
     room_title_en = models.CharField(max_length=100, verbose_name="Name of room")
-    room_capacity = models.IntegerField(verbose_name="Капацитет")
+    room_capacity = models.IntegerField(verbose_name="Капацитет", help_text="Максимален брой гости")
     room_size = models.IntegerField(verbose_name="Квадратура")
     room_services = models.TextField(verbose_name="Екстри")
     room_services_en = models.TextField(verbose_name="Services")
-    price = models.FloatField(verbose_name="Цена")
-    price_rate = models.FloatField(verbose_name='Ценови коефициент')
+    min_price = models.IntegerField(verbose_name='Минимална цена', help_text="При минимален брой гости")
+    price = models.IntegerField(verbose_name="Цена", help_text="При максимален брой гости")
+    discount_per_person = models.FloatField(verbose_name='Отсъпка на човек', help_text="Отстъпка при непълен капацитет")
     image = models.ImageField(upload_to="room/", verbose_name="Качи снимка")
 
     class Meta:
@@ -55,10 +58,6 @@ class Room(models.Model):
     @property
     def title_en(self):
         return f"№{self.id}: {self.room_title_en}"
-
-    @property
-    def price_per_person(self):
-        return self.price / self.room_capacity
 
     @property
     def thumbnail_preview(self):
@@ -76,7 +75,7 @@ class Reservation(models.Model):
     confirm = models.BooleanField(default=False, blank=True, verbose_name="Потвърждаване")
     name = models.CharField(max_length=150, verbose_name="Имена")
     phone = models.CharField(max_length=25, verbose_name="Телефон за връзка")
-    email = models.EmailField(verbose_name="Имейл")
+    email = models.EmailField(blank=True, null=True, verbose_name="Имейл")
     check_in = models.DateTimeField(verbose_name="Настаняване", default=af.default_check_in)
     check_out = models.DateField(verbose_name="Напускане", default=af.default_check_out)
     adults = models.PositiveIntegerField(verbose_name="Брой възрастни")
@@ -84,7 +83,7 @@ class Reservation(models.Model):
     description = models.TextField(verbose_name='Коментар', blank=True, null=True)
     room = models.ForeignKey(Room, verbose_name="Стая", blank=True, null=True, on_delete=models.SET_NULL)
     price = models.FloatField(verbose_name='Цена', blank=True, null=True, default=0)
-    discount = models.IntegerField(verbose_name='Отстъпка/ Надценка', blank=True, null=True)
+    discount = models.FloatField(verbose_name='Отстъпка/ Надценка', blank=True, null=True)
     added_on = models.DateTimeField(verbose_name='Резервирана на', blank=True, default=datetime.now)
     archived = models.BooleanField(default=False, blank=True, choices=BOOL_CHOICES, verbose_name="Архивиране",
                                    help_text="Резервациите се архивират автоматично, след като изтече датата на напускане!")
@@ -94,8 +93,26 @@ class Reservation(models.Model):
         return self.adults + self.children
 
     @admin.display(boolean=True, description="С")
-    def status(self):
+    def status_admin(self):
         return self.confirm
+
+    @admin.display(description="Настаняване")
+    def check_in_admin(self):
+        locale.setlocale(locale.LC_TIME, "bg_BG")
+        check_in = self.check_in
+        return check_in.strftime(ADMIN_LIST_DISPLAY_DATETIME_FORMAT)
+
+    @admin.display(description="Резервирана")
+    def added_on_admin(self):
+        locale.setlocale(locale.LC_TIME, "bg_BG")
+        added_on = self.added_on
+        return added_on.strftime(ADMIN_LIST_DISPLAY_DATETIME_FORMAT)
+
+    @admin.display(description="Напускане")
+    def check_out_admin(self):
+        locale.setlocale(locale.LC_TIME, "bg_BG")
+        check_out = self.check_out
+        return check_out.strftime(ADMIN_LIST_DISPLAY_DATE_FORMAT)
 
     @property
     def calc_days(self):
@@ -127,15 +144,15 @@ class Reservation(models.Model):
         if self.children is None:
             self.children = 0
 
+        if not self.pk and not self.room:
+            af.send_notification_email(self)
+
         if self.room:
             is_room_busy = self.is_room_busy()
             validators.is_room_busy(is_room_busy)
             validators.is_room_capacity_exceeded(self)
         else:
             validators.is_room_choosen(self)
-
-        if not self.pk:
-            af.send_notification_email(self)
 
     class Meta:
         verbose_name = "Резервация"
@@ -201,12 +218,12 @@ class Gallery(models.Model):
     @property
     def thumbnail_preview(self):
         if self.image:
-            return mark_safe('<img src="{}" width="250" alt="Няма снимка" />'.format(self.image.url))
+            return mark_safe(f'<img src="{self.image.url}" width="250" height="250" style="object-fit: contain;" alt="Няма снимка" />')
         return ""
     thumbnail_preview.fget.short_description = 'Преглед'
 
     class Meta:
-        verbose_name = "Снимка"
+        verbose_name = "Галерия"
         verbose_name_plural = "3. Галерия"
 
 

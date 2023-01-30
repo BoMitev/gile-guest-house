@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
+{% load static %}
 <head>
 	<meta charset="UTF-8">
 	<meta name="description" content="GILE Guest House">
 	<meta name="keywords" content="GILE, guest, house, hostel, cheep, Veliko, Tarnovo, Bulgaria">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:image" content="{% static 'img/mobile_favicon.png' %}"/>
 	<title>{{ page_title }} - GILE Guest House</title>
-	{% load static %}
-	<!-- Google Font -->
 	<link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css">
@@ -33,9 +32,9 @@
     <div id="preloder">
         <div class="loader"></div>
     </div>
-
-
-    <!-- Offcanvas Menu Section Begin -->
+    <!-- Header Section Begin -->
+    <header class="header-section header-normal">
+        <!-- Offcanvas Menu Section Begin -->
     <div class="offcanvas-menu-overlay"></div>
     <div class="canvas-open">
         <i class="icon_menu"></i>
@@ -50,17 +49,13 @@
 				<img src="{% static 'img/flag_bg.jpg' %}" alt="">
 				<span>{{ request.session.language }} <i class="fa fa-angle-down"></i></span>
 				<div class="flag-dropdown">
-					<ul>
-						<li><a href="{% url 'change language' %}">EN</a></li>
-					</ul>
+						<a href="{% url 'change language' %}"><ul><li>EN</li></ul></a>
 				</div>
 				{% else %}
 				<img src="{% static 'img/flag.jpg' %}" alt="">
 				<span>{{ request.session.language }} <i class="fa fa-angle-down"></i></span>
 				<div class="flag-dropdown">
-					<ul>
-						<li><a href="{% url 'change language' %}">BG</a></li>
-					</ul>
+						<a href="{% url 'change language' %}"><ul><li>BG</li></ul></a>
 				</div>
 				{% endif %}
             </div>
@@ -88,8 +83,6 @@
     </div>
     <!-- Offcanvas Menu Section End -->
 
-    <!-- Header Section Begin -->
-    <header class="header-section header-normal">
         <div class="top-nav">
             <div class="container">
                 <div class="row">
@@ -110,17 +103,13 @@
 								<img src="{% static 'img/flag_bg.jpg' %}" alt="">
                                 <span>{{ request.session.language }} <i class="fa fa-angle-down"></i></span>
                                 <div class="flag-dropdown">
-                                    <ul>
-                                        <a href="{% url 'change language' %}"><li>EN</li></a>
-                                    </ul>
+                                        <a href="{% url 'change language' %}"><ul><li>EN</li></ul></a>
                                 </div>
 								{% else %}
 								<img src="{% static 'img/flag.jpg' %}" alt="">
                                 <span>{{ request.session.language }} <i class="fa fa-angle-down"></i></span>
                                 <div class="flag-dropdown">
-                                    <ul>
-                                        <a href="{% url 'change language' %}"><li>BG</li></a>
-                                    </ul>
+                                        <a href="{% url 'change language' %}"><ul><li>BG</li></ul></a>
                                 </div>
 								{% endif %}
                             </div>

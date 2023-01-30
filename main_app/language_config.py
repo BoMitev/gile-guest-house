@@ -1,6 +1,11 @@
 DEFAULT_LANGUAGE = 'bg'
 STATICS = {
     'bg': {
+        'validations':{
+            'check_out': 'Датата на настаняване трябва да е след датата на напускане.',
+            'email': 'Невалиден имейл адрес',
+            'phone': 'Невалиден номер',
+        },
         'menu': {
             'home': 'Начало',
             'rooms': 'Стаи',
@@ -71,6 +76,11 @@ STATICS = {
         },
     },
     'en': {
+        'validations': {
+            'check_out': 'Check out date must be greater than check in date',
+            'email': 'Invalid email address',
+            'phone': 'Invalid phone number',
+        },
         'menu': {
             'home': 'Home',
             'rooms': 'Rooms',

@@ -30,7 +30,7 @@
                                 </div>
                             </div>
                             {% if reservation_form.check_out.errors %}
-                                <sup>{{ reservation_form.check_out.errors }}</sup>
+                                <sup>{{ page_statics.validations.check_out }}</sup>
                             {% endif %}
                             <div class="check-date">
                                 <label for="{{ reservation_form.name.id_for_label }}">{{ page_statics.page.home.book_form.name }}:</label>
@@ -40,13 +40,15 @@
                                 <label for="{{ reservation_form.phone.id_for_label }}">{{ page_statics.page.home.book_form.phone }}:</label>
                                 {{ reservation_form.phone }}
                             </div>
-
+                            {% if reservation_form.phone.errors %}
+                                <sup>{{ page_statics.validations.phone }}</sup>
+                            {% endif %}
                             <div class="check-date">
                                 <label for="{{ reservation_form.email.id_for_label }}">{{ page_statics.page.home.book_form.email }}:</label>
                                 {{ reservation_form.email }}
                             </div>
                             {% if reservation_form.email.errors %}
-                                <sup>{{ reservation_form.email.errors }}</sup>
+                                <sup>{{ page_statics.validations.email }}</sup>
                             {% endif %}
                             <div id="inline">
                                 <div class="select-option">
@@ -171,9 +173,13 @@
                         <div class="col-lg-3 col-md-6">
                             <div class="hp-room-item set-bg" data-setbg="{{ room.image.url }}">
                                 <div class="hr-text">
-                                    <h3>{% if language == 'bg' %}{{ room.title }}{% else %}
-                                        {{ room.title_en }}{% endif %}</h3>
-                                    <h2>{{ room.price }} лв<span>/{{ page_statics.page.rooms.rooms_terms.0 }}</span>
+                                   {% if language == 'bg' %}
+                                         <h3>{{ room.title }}</h3>
+                                       <h2><span>от </span>{{ room.min_price }}<span> до </span>{{ room.price }}<span> лв/ {{ page_statics.page.rooms.rooms_terms.0 }}</span>
+                                    {% else %}
+                                         <h3>{{ room.title_en }}</h3>
+                                       <h2><span>from </span>{{ room.min_price }}<span> to </span>{{ room.price }}<span> BGN/ {{ page_statics.page.rooms.rooms_terms.0 }}</span>
+                                    {% endif %}
                                     </h2>
                                     <table>
                                         <tbody>
@@ -189,9 +195,9 @@
                                             <td class="r-o">{{ page_statics.page.rooms.rooms_terms.4 }}:</td>
                                             <td>
                                                 {% if language == 'bg' %}
-                                                    {{ room.room_services|truncatechars:40 }}
+                                                    {{ room.room_services|truncatechars:50 }}
                                                 {% else %}
-                                                    {{ room.room_services_en|truncatechars:40 }}
+                                                    {{ room.room_services_en|truncatechars:50 }}
                                                 {% endif %}
                                             </td>
                                         </tr>

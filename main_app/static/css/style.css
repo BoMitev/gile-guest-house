@@ -929,7 +929,7 @@ ol {
 	position: absolute;
 	left: 45px;
 	right: 25px;
-	bottom: -220px;
+	bottom: -180px;
 	-webkit-transition: all 0.5s;
 	-o-transition: all 0.5s;
 	transition: all 0.5s;
@@ -1375,7 +1375,7 @@ ol {
 	border: 1px solid #ebebeb;
 	border-top: none;
 	padding: 24px 24px 30px 28px;
-    height: 390px;
+    height: 500px;
     overflow: hidden;
 }
 
@@ -1599,19 +1599,25 @@ ol {
 
 @media only screen and (min-width: 1554px) and (max-width: 1920px) {
 	.hp-room-items .hp-room-item .hr-text {
-		bottom: -206px;
+		bottom: -220px;
+	}
+}
+
+@media only screen and (min-width: 1425px) and (max-width: 1554px) {
+	.hp-room-items .hp-room-item .hr-text {
+		bottom: -210px;
 	}
 }
 
 @media only screen and (min-width: 1250px) and (max-width: 1425px) {
 	.hp-room-items .hp-room-item .hr-text {
-		bottom: -260px;
+		bottom: -250px;
 	}
 }
 
 @media only screen and (min-width: 1200px) and (max-width: 1250px) {
 	.hp-room-items .hp-room-item .hr-text {
-		bottom: -330px;
+		bottom: -325px;
 	}
 }
 
@@ -1633,7 +1639,7 @@ ol {
 	}
 
 	.hp-room-items .hp-room-item .hr-text {
-		bottom: -322px;
+		bottom: -360px;
 	}
 
 	.hp-room-items .hp-room-item:hover .hr-text {
@@ -1643,6 +1649,17 @@ ol {
 }
 
 @media only screen and (max-width: 991px) {
+
+	.breadcrumb-section, .contact-section {
+		padding-top: 130px;
+	}
+
+	header {
+		position: fixed;
+    	width: 100%;
+    	background: #ffffff;
+    	z-index: 100;
+	}
 
 	.top-nav {
 		display: none;
@@ -1947,6 +1964,10 @@ ol {
 
 @media only screen and (min-width: 768px) and (max-width: 991px) {
 
+	.hp-room-items .hp-room-item .hr-text {
+		bottom: -210px;
+	}
+
 	.testimonial-slider.owl-carousel .owl-nav button {
 		left: -30px;
 	}
@@ -2015,8 +2036,13 @@ ol {
 /* Small Mobile: 320px */
 
 @media only screen and (max-width: 479px) {
+
+	.hp-room-items .hp-room-item .hr-text {
+		bottom: -245px;
+	}
+
 	.menu-item .logo {
-		width: 40%;
+		width: 50%;
 	}
 	.footer-section .copyright-option ul li {
 		margin-bottom: 5px;

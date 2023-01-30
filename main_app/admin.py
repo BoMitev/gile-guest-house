@@ -1,5 +1,4 @@
 from datetime import date
-
 from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action, link, view
 from django.contrib import admin
 from django.contrib.auth.models import Group
@@ -8,12 +7,20 @@ from hotel_gile.main_app.models import Room, Page, PageSection, TermWorkList, He
     Reviews, Gallery, Reservation, ArchivedReservation
 import hotel_gile.main_app.auxiliary_functions as af
 
+
+
 admin.site.unregister(Group)
 
 
 class PageSectionInlineAdmin(admin.StackedInline):
     model = PageSection
     extra = 1
+
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Room)
@@ -29,14 +36,22 @@ class RoomAdmin(admin.ModelAdmin):
             room.delete()
         super().save_model(request, obj, form, change)
 
+    fieldsets = (
+        ('', {
+            'fields': (
+                ('room_title', 'room_title_en',), 'room_capacity', 'room_size', 'room_services', 'room_services_en', ('price', 'min_price', 'discount_per_person'), ('image', 'thumbnail_preview'))
+        }),
+    )
+
 
 @admin.register(Reservation)
 class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display_links = ("title",)
-    list_display = ("status", 'title', 'name', 'calc_days', 'check_in', 'check_out', 'added_on', 'price_currency')
+    list_display = ("status_admin", 'title', 'name', 'calc_days', 'check_in_admin', 'check_out_admin', 'added_on_admin', 'price_currency')
     exclude = ('id',)
     readonly_fields = ('price_currency',)
-    ordering = ('check_in', 'check_out')
+    list_per_page = 15
+    ordering = ('check_in', 'check_out', 'room_id')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -83,7 +98,7 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                     obj.price = 0
 
                 if obj.confirm:
-                    if "confirm" in form.changed_data:
+                    if "confirm" in form.changed_data and obj.email:
                         af.send_confirmation_email(obj)
 
                     if obj.external_id:
@@ -92,6 +107,7 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                         external_id = af.send_reservation(obj)
                         obj.external_id = external_id
                 else:
+
                     if obj.external_id:
                         af.delete_reservation(obj)
                         obj.external_id = None
@@ -142,13 +158,10 @@ class ArchivedReservationAdmin(admin.ModelAdmin):
     list_display = ("confirm", 'title', 'name', 'calc_days', 'check_in', 'check_out', 'added_on', 'price_currency')
     exclude = ('id',)
 
-    def has_add_permission(self, request):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
     def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
         return False
 
     def get_queryset(self, request):
@@ -231,10 +244,9 @@ class ContactAdmin(admin.ModelAdmin):
 
 @admin.register(Reviews)
 class ReviewsAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    def has_add_permission(self, request):
-        return False
+    list_display = ('name', 'score', 'review_id')
 
-    def has_delete_permission(self, request, obj=None):
+    def has_add_permission(self, request):
         return False
 
     def has_change_permission(self, request, obj=None):
@@ -259,3 +271,9 @@ class ReviewsAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                 except Exception as ex:
                     pass
         return
+
+    fieldsets = (
+        ('', {
+            'fields': ('name', ('pros', 'cons'), 'score')
+        }),
+    )

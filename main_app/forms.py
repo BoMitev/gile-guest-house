@@ -47,9 +47,30 @@ class ReservationForm(forms.ModelForm):
         check_out = datetime.combine(self.cleaned_data['check_out'], datetime.strptime("12:00:00", '%H:%M:%S').time())
 
         if check_out <= check_in:
-            raise ValidationError('Датата на настаняване трябва да е след датата на напускане.')
+            raise ValidationError('')
 
         return datetime.combine(check_out, datetime.strptime("12:00:00", '%H:%M:%S').time())
+
+    def clean_phone(self):
+        import phonenumbers
+
+        phone_number = self.cleaned_data['phone']
+
+        try:
+            if phone_number.startswith('00'):
+                my_number = phonenumbers.parse("+" + phone_number[2:])
+            elif phone_number.startswith('0'):
+                my_number = phonenumbers.parse("+359" + phone_number[1:])
+            else:
+                my_number = phonenumbers.parse(phone_number)
+            status = phonenumbers.is_possible_number(my_number)
+        except Exception as ex:
+            status = False
+
+        if not status:
+            raise ValidationError('')
+
+        return phone_number
 
 
 class ContactForm(forms.ModelForm):

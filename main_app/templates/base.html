@@ -5,7 +5,7 @@
 	<meta charset="UTF-8">
 	<meta name="description" content="GILE Guest House">
 	<meta name="keywords" content="GILE, guest, house, hostel, cheep, Veliko, Tarnovo, Bulgaria">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1">
     <meta property="og:image" content="{% static 'img/mobile_favicon.png' %}"/>
 	<title>{{ page_title }} - GILE Guest House</title>
 	<link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
@@ -24,7 +24,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/mobile_favicon.png' %}">
     <link rel="manifest" href="{% static 'js/manifest.json' %}">
     <link rel="stylesheet" href="https://rawgit.com/LeshikJanz/libraries/master/Bootstrap/baguetteBox.min.css">
-
 </head>
 
 <body>
@@ -74,7 +73,7 @@
         <div id="mobile-menu-wrap"></div>
         <div class="top-social">
             <a href="{{ page_dynamics.facebook_url }}" target="_blank"><i class="fa fa-facebook"></i></a>
-            <a href="{{ page_dynamics.booking_url }}" target="_blank"><i class="fa fa-address-book"></i></a>
+            <a href="{{ page_dynamics.booking_url }}" target="_blank"><i class="fa fa-bookmark" aria-hidden="true"></i></a>
         </div>
         <ul class="top-widget">
             <li><i class="fa fa-phone"></i><a href="tel:{{ page_dynamics.phone }}">{{ page_dynamics.phone }}</a></li>
@@ -96,7 +95,7 @@
                         <div class="tn-right">
                             <div class="top-social">
                                 <a href="{{ page_dynamics.facebook_url }}" target="_blank"><i class="fa fa-facebook"></i></a>
-                                <a href="{{ page_dynamics.booking_url }}" target="_blank"><i class="fa fa-address-book"></i></a>
+                                <a href="{{ page_dynamics.booking_url }}" target="_blank"><i class="fa fa-bookmark" aria-hidden="true"></i></a>
                             </div>
                             <div class="language-option">
 								{% if language == 'bg' %}
@@ -165,7 +164,7 @@
                             <p> {{ page_dynamics.footer_slogan }}</p>
                             <div class="fa-social">
                                 <a href="{{ page_dynamics.facebook_url }}"><i class="fa fa-facebook"></i></a>
-                                <a href="{{ page_dynamics.booking_url }}"><i class="fa fa-address-book"></i></a>
+                                <a href="{{ page_dynamics.booking_url }}"><i class="fa fa-bookmark" aria-hidden="true"></i></a>
                             </div>
                         </div>
                     </div>
@@ -191,9 +190,9 @@
 	<script src="{% static 'js/jquery.slicknav.js' %}"></script>
 	<script src="{% static 'js/owl.carousel.min.js' %}"></script>
 	<script src="{% static 'js/main.js' %}"></script>
-    <script>
+    <script src="{% static 'js/jquery-ui-i18n.min.js' %}"></script>
+    <script type="text/javascript">
     $(document).ready(function() {
-
         $(function() {
             $(".check_in").datepicker({
                 minDate: 0,
@@ -212,8 +211,11 @@
             startDate = $(this).datepicker('getDate');
             startDate.setDate(startDate.getDate()+1);
             $(".check_out").datepicker("option", "minDate", startDate);
-        })
+        });
+
+        $.datepicker.setDefaults($.datepicker.regional['{{ language }}']);
     })
+
 </script>
 </body>
 

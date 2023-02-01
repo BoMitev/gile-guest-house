@@ -7,8 +7,6 @@ from hotel_gile.main_app.models import Room, Page, PageSection, TermWorkList, He
     Reviews, Gallery, Reservation, ArchivedReservation
 import hotel_gile.main_app.auxiliary_functions as af
 
-
-
 admin.site.unregister(Group)
 
 
@@ -89,28 +87,26 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         super().delete_model(request, queryset)
 
     def save_model(self, request, obj, form, change):
-        if form.changed_data:
-            if not obj.archived:
-                if obj.room:
-                    price = af.calculate_reservation_price(obj)
-                    obj.price = price
+        if form.changed_data and not obj.archived:
+            if obj.room:
+                price = af.calculate_reservation_price(obj)
+                obj.price = price
+            else:
+                obj.price = 0
+
+            if obj.confirm:
+                if "confirm" in form.changed_data and obj.email:
+                    af.send_confirmation_email(obj)
+
+                if obj.external_id:
+                    af.update_reservation(obj)
                 else:
-                    obj.price = 0
-
-                if obj.confirm:
-                    if "confirm" in form.changed_data and obj.email:
-                        af.send_confirmation_email(obj)
-
-                    if obj.external_id:
-                        af.update_reservation(obj)
-                    else:
-                        external_id = af.send_reservation(obj)
-                        obj.external_id = external_id
-                else:
-
-                    if obj.external_id:
-                        af.delete_reservation(obj)
-                        obj.external_id = None
+                    external_id = af.send_reservation(obj)
+                    obj.external_id = external_id
+            else:
+                if obj.external_id:
+                    af.delete_reservation(obj)
+                    obj.external_id = None
 
         super().save_model(request, obj, form, change)
 
@@ -258,18 +254,17 @@ class ReviewsAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         reviews, response = af.load_reviews()
         if response == 200:
             for review in reviews:
-                review_id = review['review_id']
-                name = review['author']['name']
-                pros = review['pros']
-                cons = review['cons']
+                if not review['pros']:
+                    continue
                 score_int = round(int(review['average_score']) * 1.25)
                 score = '*' * score_int
-                if not pros:
-                    continue
-                try:
-                    Reviews.objects.create(review_id=review_id, name=name, pros=pros, cons=cons, score=score)
-                except Exception as ex:
-                    pass
+                Reviews.objects.get_or_create(
+                    review_id=review['review_id'],
+                    name=review['author']['name'],
+                    pros=review['pros'],
+                    cons=review['cons'],
+                    score=score
+                )
         return
 
     fieldsets = (

@@ -1,5 +1,5 @@
 import smtplib
-from datetime import datetime
+import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from django.contrib.auth.models import User
@@ -17,21 +17,21 @@ def get_session_language(session):
 
 
 def default_check_in():
-    today = datetime.today()
+    today = datetime.datetime.today()
     year = int(today.strftime("%Y"))
     month = int(today.strftime("%m"))
     day = int(today.strftime("%d"))
 
-    return datetime(year, month, day, 14, 00)
+    return datetime.datetime(year, month, day, 14, 00)
 
 
 def default_check_out():
-    today = datetime.today()
+    today = datetime.datetime.today()
     year = int(today.strftime("%Y"))
     month = int(today.strftime("%m"))
     day = int(today.strftime("%d"))
 
-    return datetime(year, month, day + 1, 12, 00)
+    return datetime.datetime(year, month, day, 12, 00) + datetime.timedelta(days=1)
 
 
 def calculate_reservation_price(reservation):
@@ -63,7 +63,7 @@ def load_reviews():
 # ======== RESERVATIONS ==========
 
 def event_template(obj):
-    temp_object = datetime.strptime("14:00:00", '%H:%M:%S').time()
+    temp_object = datetime.datetime.strptime("14:00:00", '%H:%M:%S').time()
     check_in_time = ""
     if obj.check_in.time() != temp_object:
         check_in_time = f'Час на пристигане: {obj.check_in.time()}\n'
@@ -71,9 +71,9 @@ def event_template(obj):
     result = {
         'summary': obj.title,
         'description': f'{obj.name} / {obj.phone}\n'
-                       f'{obj.adults}+{obj.children} човека - {obj.price}лв.\n'
+                       f'{obj.adults}+{obj.children} човека\n'
+                       f'{obj.calc_days} x {obj.price/obj.calc_days:.2f} = {obj.price:.2f}лв.\n'
                        f'{check_in_time}'
-                       f'Брой нощувки: {obj.calc_days}\n'
                        f'{obj.description}',
         'colorId': str(obj.room.id),
         'start': {
@@ -157,7 +157,7 @@ def send_confirmation_email(reservation):
         session.sendmail(SMTP_USER, reservation.email, message.as_string())
         session.quit()
     except Exception as ex:
-        pass
+        print(ex)
 
 
 def send_notification_email(reservation):
@@ -185,4 +185,4 @@ def send_notification_email(reservation):
         session.sendmail(SMTP_USER, staff_email_list, message.as_string())
         session.quit()
     except Exception as ex:
-        pass
+        print(ex)

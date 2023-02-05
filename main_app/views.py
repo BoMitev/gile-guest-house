@@ -1,7 +1,7 @@
 import inspect
 from django.shortcuts import render, redirect
 from hotel_gile.main_app.models import TermWorkList, Page, PageSection, Room, HeroGallery, \
-    Reviews, Gallery
+    Reviews, Gallery, RoomPrice
 from hotel_gile.main_app.forms import ContactForm, ReservationForm
 import hotel_gile.main_app.language_config as lang_config
 import hotel_gile.main_app.auxiliary_functions as aux_func

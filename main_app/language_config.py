@@ -70,7 +70,8 @@ STATICS = {
                 'rooms_terms': ['нощувка', 'Размер', 'Капацитет', 'Легла', 'Удобства'],
             },
             'contacts': {
-                'contact_info': 'Как можем да Ви помогнем?',
+                'contact_info': 'Как можем да сме полезни?',
+                'contact_info_text': "Имате въпроси? Моля, свържете се с нас. Ще отговорим на въпросите Ви възможно най-скоро. Просто попълнете формата и ни я изпратете.",
                 'contact_form': ['Име', 'Email', 'Вашето съобщение', 'Изпрати'],
             },
         },
@@ -145,6 +146,7 @@ STATICS = {
             },
             'contacts': {
                 'contact_info': 'How can we help?',
+                'contact_info_text': 'You have questions? Please contact us at any time. We will reply to your query as soon as possible. Just fill out the contact form and submit it.',
                 'contact_form': ['Your name', 'Your Email', 'Your Message', 'Submit Now'],
             }
         },

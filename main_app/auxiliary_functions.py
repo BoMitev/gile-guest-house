@@ -35,15 +35,15 @@ def default_check_out():
 
 
 def calculate_reservation_price(reservation):
+    from hotel_gile.main_app.models import RoomPrice
+
     if not reservation.discount:
         discount = 0
     else:
         discount = reservation.discount
 
-    formula = reservation.calc_days * (reservation.room.price - (reservation.room.discount_per_person *
-                                                                 (reservation.room.room_capacity - max(
-                                                                     reservation.total_guests,
-                                                                     2)))) + discount
+    obj = RoomPrice.objects.get(room=reservation.room, persons=reservation.total_guests)
+    formula = reservation.calc_days * (obj.price + discount)
 
     return round(formula, 1)
 

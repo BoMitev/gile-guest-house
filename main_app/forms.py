@@ -25,10 +25,10 @@ CHILDREN_CHOOSES = (
 
 class ReservationForm(forms.ModelForm):
     name = forms.CharField(max_length=200, widget=forms.TextInput(attrs={'class': 'input', 'id': 'name'}))
-    phone = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class': 'input', 'id': 'phone'}))
-    email = forms.EmailField(widget=forms.TextInput(attrs={'id': 'email'}))
-    check_in = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS, widget=forms.TextInput(attrs={'class': 'check_in', 'id': 'date-in'}))
-    check_out = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS, widget=forms.TextInput(attrs={'class': 'check_out', 'id': 'date-out'}))
+    phone = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class': 'input', 'id': 'phone', 'inputmode': 'tel'}))
+    email = forms.EmailField(widget=forms.TextInput(attrs={'id': 'email', 'inputmode': 'email'}))
+    check_in = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS, widget=forms.TextInput(attrs={'class': 'check_in', 'id': 'date-in', 'inputmode':'none'}))
+    check_out = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS, widget=forms.TextInput(attrs={'class': 'check_out', 'id': 'date-out', 'inputmode':'none'}))
     adults = forms.ChoiceField(choices=ADULTS_CHOOSES, label="", initial='',
                                widget=forms.Select(attrs={'id': 'guest'}))
     children = forms.ChoiceField(choices=CHILDREN_CHOOSES, label="", initial='',

@@ -1,10 +1,10 @@
-from datetime import date
+from datetime import date, datetime
 from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action, link, view
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from hotel_gile.main_app.models import Room, Page, PageSection, TermWorkList, HeroGallery, Contact, \
-    Reviews, Gallery, Reservation, ArchivedReservation
+    Reviews, Gallery, Reservation, ArchivedReservation, RoomPrice
 import hotel_gile.main_app.auxiliary_functions as af
 
 admin.site.unregister(Group)
@@ -21,40 +21,59 @@ class PageSectionInlineAdmin(admin.StackedInline):
         return False
 
 
+class RoomPriceInlineAdmin(admin.TabularInline):
+    exclude = ('persons',)
+    model = RoomPrice
+    extra = 0
+
+    def get_min_num(self, request, obj=None, **kwargs):
+        return obj.room_capacity if obj else 0
+
+    def get_max_num(self, request, obj=None, **kwargs):
+        return obj.room_capacity if obj else 0
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ('title', 'price',)
-    readonly_fields = ('thumbnail_preview',)
+    list_display = ('title', 'room_title_en', 'max_price')
+    readonly_fields = ('thumbnail_preview', )
+    inlines = (RoomPriceInlineAdmin,)
     ordering = ('id',)
 
-    def save_model(self, request, obj, form, change):
-        if 'id' in form.changed_data and not request.path.find("add"):
-            old_id = form.initial['id']
-            room = Room.objects.get(id=old_id)
-            room.delete()
-        super().save_model(request, obj, form, change)
+    def get_readonly_fields(self, request, obj=None):
+        fields = self.readonly_fields
+        if obj:
+            fields += ('id',)
+        return fields
 
     fieldsets = (
         ('', {
             'fields': (
-                ('room_title', 'room_title_en',), 'room_capacity', 'room_size', 'room_services', 'room_services_en', ('price', 'min_price', 'discount_per_person'), ('image', 'thumbnail_preview'))
+                'id', ('room_title', 'room_title_en',), ('room_capacity', 'room_size'), 'room_services',
+                'room_services_en', ('image', 'thumbnail_preview'))
         }),
+
     )
 
 
 @admin.register(Reservation)
 class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display_links = ("title",)
-    list_display = ("status_admin", 'title', 'name', 'calc_days', 'check_in_admin', 'check_out_admin', 'added_on_admin', 'price_currency')
-    exclude = ('id',)
-    readonly_fields = ('price_currency',)
+    list_display = ('status_admin', 'title', 'name', 'calc_days', 'check_in_admin', 'check_out_admin', 'added_on_admin',
+                    'price_currency')
+    search_fields = ['name__icontains', 'id__iexact']
+    readonly_fields = ('price_currency', 'id')
     list_per_page = 15
-    ordering = ('check_in', 'check_out', 'room_id')
+    ordering = ('confirm', 'check_in', 'check_out', 'room_id')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         for reservation in qs:
-            if reservation.check_out < date.today():
+            check_out = datetime.strptime(reservation.check_out.strftime('%Y-%m-%d 12:00:00'), '%Y-%m-%d %H:%M:%S')
+            if check_out < datetime.today():
                 reservation.archived = True
                 reservation.save()
         return qs.filter(archived=False)
@@ -71,8 +90,8 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         if obj.external_id:
             try:
                 af.delete_reservation(obj)
-            except:
-                pass
+            except Exception as ex:
+                print(ex)
 
         super().delete_model(request, obj)
 
@@ -81,8 +100,8 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             if obj.external_id:
                 try:
                     af.delete_reservation(obj)
-                except:
-                    pass
+                except Exception as ex:
+                    print(ex)
 
         super().delete_model(request, queryset)
 
@@ -110,6 +129,30 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
         super().save_model(request, obj, form, change)
 
+    def get_fieldsets(self, request, obj=None):
+        if obj:
+            return (
+                ('', {
+                    'fields': ('confirm',)
+                }),
+                ('Резервация на:', {
+                    'fields': (('room', 'id'), ('name', 'phone', 'email'),
+                               ('check_in', 'check_out'), ('adults', 'children'),
+                               'description', ('price_currency', 'discount',), ('archived',))
+                }),
+            )
+
+        return (
+            ('', {
+                'fields': ('confirm',)
+            }),
+            ('Резервация на:', {
+                'fields': ('room', ('name', 'phone', 'email'),
+                           ('check_in', 'check_out'), ('adults', 'children'),
+                           'description', ('price_currency', 'discount',), ('archived',))
+            }),
+        )
+
     # @button(html_attrs={'style': 'background-color:#DBC913;color:black'})
     # def load(self, request):
     #     reservations = af.load_reservations()
@@ -135,24 +178,19 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     #     self.message_user(request, 'Зареждане от Google Календар')
     #     return
 
-    fieldsets = (
-        ('', {
-            'fields': ('confirm',)
-        }),
-        ('Резервация на:', {
-            'fields': (
-                'room', ('name', 'phone', 'email'), ('check_in', 'check_out'), ('adults', 'children'), 'description',
-                ('price_currency', 'discount',),
-                ('archived',))
-        }),
-    )
-
 
 @admin.register(ArchivedReservation)
 class ArchivedReservationAdmin(admin.ModelAdmin):
     list_display_links = ("title",)
-    list_display = ("confirm", 'title', 'name', 'calc_days', 'check_in', 'check_out', 'added_on', 'price_currency')
+    list_display = ('title', 'name', 'calc_days', 'check_in_admin', 'check_out_admin', 'added_on_admin',
+                    'price_currency')
+    search_fields = ['name__icontains', 'id__iexact', 'check_in__icontains', 'check_out__icontains']
     exclude = ('id',)
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.id == 1:
+            return True
+        return False
 
     def has_change_permission(self, request, obj=None):
         return False
@@ -167,7 +205,8 @@ class ArchivedReservationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Резервация на:', {
             'fields': (
-                'room', ('name', 'phone', 'email'), ('check_in', 'check_out'), ('adults', 'children'), 'description',
+                ('room', 'id'), ('name', 'phone', 'email'), ('check_in_admin', 'check_out_admin'),
+                ('adults', 'children'), 'description',
                 ('price_currency', 'discount',))
         }),
     )
@@ -177,6 +216,7 @@ class ArchivedReservationAdmin(admin.ModelAdmin):
 class PageAdmin(admin.ModelAdmin):
     list_display = ('language',)
     inlines = (PageSectionInlineAdmin,)
+    ordering = ('language',)
 
     def has_add_permission(self, request):
         return False
@@ -197,6 +237,7 @@ class PageAdmin(admin.ModelAdmin):
 class TermWorkListAdmin(admin.ModelAdmin):
     list_display = ('language',)
     readonly_fields = ('language',)
+    ordering = ('language',)
 
     def has_add_permission(self, request):
         return False
@@ -240,7 +281,9 @@ class ContactAdmin(admin.ModelAdmin):
 
 @admin.register(Reviews)
 class ReviewsAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ('name', 'score', 'review_id')
+    list_display = ('name', 'score', 'date')
+    ordering = ('-date',)
+    search_fields = ['name__icontains', ]
 
     def has_add_permission(self, request):
         return False
@@ -253,22 +296,28 @@ class ReviewsAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         self.message_user(request, 'Зареждане на съобщения от Booking.com')
         reviews, response = af.load_reviews()
         if response == 200:
-            for review in reviews:
-                if not review['pros']:
-                    continue
-                score_int = round(int(review['average_score']) * 1.25)
-                score = '*' * score_int
-                Reviews.objects.get_or_create(
-                    review_id=review['review_id'],
-                    name=review['author']['name'],
-                    pros=review['pros'],
-                    cons=review['cons'],
-                    score=score
-                )
+            objects = [Reviews(review_id=review['review_id'],
+                               name=review['author']['name'],
+                               pros=review['pros'],
+                               cons=review['cons'],
+                               score=round(float(review['average_score']) * 2.5, 1),
+                               date=review['date'],
+                               check_in=review['stayed_room_info']['checkin'],
+                               check_out=review['stayed_room_info']['checkout'],
+                               room=review['stayed_room_info']['room_name']
+                               ) for review in reviews if review['pros']]
+
+            Reviews.objects.bulk_create(objects, update_conflicts=True, unique_fields=['review_id'],
+                                        update_fields=['name', 'pros', 'cons', 'score', 'date', 'check_in', 'check_out',
+                                                       'room'])
+
         return
 
     fieldsets = (
-        ('', {
-            'fields': ('name', ('pros', 'cons'), 'score')
+        ('Отзив:', {
+            'fields': ('name', 'pros', 'cons', 'score', 'date')
+        }),
+        ('От резервация:', {
+            'fields': ('room', ('check_in', 'check_out'))
         }),
     )

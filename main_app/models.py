@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import locale
 from django.contrib import admin
 from django.db import models
@@ -37,14 +37,11 @@ class HeroGallery(models.Model):
 class Room(models.Model):
     id = models.IntegerField(primary_key=True, verbose_name="Номер на стая")
     room_title = models.CharField(max_length=100, verbose_name="Име на стая")
-    room_title_en = models.CharField(max_length=100, verbose_name="Name of room")
+    room_title_en = models.CharField(max_length=100, verbose_name="Name of room", help_text="На английски")
     room_capacity = models.IntegerField(verbose_name="Капацитет", help_text="Максимален брой гости")
-    room_size = models.IntegerField(verbose_name="Квадратура")
+    room_size = models.IntegerField(verbose_name="Квадратура", help_text="м3")
     room_services = models.TextField(verbose_name="Екстри")
-    room_services_en = models.TextField(verbose_name="Services")
-    min_price = models.IntegerField(verbose_name='Минимална цена', help_text="При минимален брой гости")
-    price = models.IntegerField(verbose_name="Цена", help_text="При максимален брой гости")
-    discount_per_person = models.FloatField(verbose_name='Отсъпка на човек', help_text="Отстъпка при непълен капацитет")
+    room_services_en = models.TextField(verbose_name="Services", help_text="На английски")
     image = models.ImageField(upload_to="room/", verbose_name="Качи снимка")
 
     class Meta:
@@ -54,10 +51,20 @@ class Room(models.Model):
     @property
     def title(self):
         return f"№{self.id}: {self.room_title}"
+    title.fget.short_description = "Стая"
 
     @property
     def title_en(self):
         return f"№{self.id}: {self.room_title_en}"
+
+    @property
+    def max_price(self):
+        return RoomPrice.objects.get(room=self, persons=self.room_capacity).price
+    max_price.fget.short_description = "Цена"
+
+    @property
+    def min_price(self):
+        return RoomPrice.objects.get(room=self, persons=1).price
 
     @property
     def thumbnail_preview(self):
@@ -67,23 +74,43 @@ class Room(models.Model):
     thumbnail_preview.fget.short_description = 'Преглед'
 
     def __str__(self):
-        return f"№{self.id}: {self.room_title} - {self.price}лв."
+        return f"№{self.id}: {self.room_title}."
+
+
+class RoomPrice(models.Model):
+    persons = models.IntegerField(blank=True)
+    price = models.FloatField(verbose_name='Цена', null=True, blank=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Цена"
+        verbose_name_plural = "Ценоразпис"
+        unique_together = ('id', 'room', 'persons')
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.persons = RoomPrice.objects.filter(room=self.room).count() + 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.persons} човек/а"
 
 
 class Reservation(models.Model):
+    id = models.IntegerField(primary_key=True, verbose_name="Резервация №")
     external_id = models.CharField(max_length=32, unique=True, blank=True, null=True)
     confirm = models.BooleanField(default=False, blank=True, verbose_name="Потвърждаване")
     name = models.CharField(max_length=150, verbose_name="Имена")
     phone = models.CharField(max_length=25, verbose_name="Телефон за връзка")
     email = models.EmailField(blank=True, null=True, verbose_name="Имейл")
-    check_in = models.DateTimeField(verbose_name="Настаняване", default=af.default_check_in)
+    check_in = models.DateTimeField(verbose_name="Настаняване", default=af.default_check_in, help_text="Ако няма час на пристигане остави 14:00")
     check_out = models.DateField(verbose_name="Напускане", default=af.default_check_out)
     adults = models.PositiveIntegerField(verbose_name="Брой възрастни")
-    children = models.PositiveIntegerField(verbose_name="Брой деца", blank=True, null=True, default=0)
+    children = models.PositiveIntegerField(verbose_name="Брой деца", blank=True, null=True, default=0, help_text="над 2г.")
     description = models.TextField(verbose_name='Коментар', blank=True, null=True)
     room = models.ForeignKey(Room, verbose_name="Стая", blank=True, null=True, on_delete=models.SET_NULL)
     price = models.FloatField(verbose_name='Цена', blank=True, null=True, default=0)
-    discount = models.FloatField(verbose_name='Отстъпка/ Надценка', blank=True, null=True)
+    discount = models.FloatField(verbose_name='Отстъпка/ Надценка', blank=True, null=True, help_text="В лева за нощувка")
     added_on = models.DateTimeField(verbose_name='Резервирана на', blank=True, default=datetime.now)
     archived = models.BooleanField(default=False, blank=True, choices=BOOL_CHOICES, verbose_name="Архивиране",
                                    help_text="Резервациите се архивират автоматично, след като изтече датата на напускане!")
@@ -91,6 +118,23 @@ class Reservation(models.Model):
     @property
     def total_guests(self):
         return self.adults + self.children
+
+    @property
+    def calc_days(self):
+        return abs(self.check_in.date() - self.check_out).days
+    calc_days.fget.short_description = 'Нощувки'
+
+    @property
+    def title(self):
+        if isinstance(self.room, Room):
+            return f'Стая №{self.room.id}'
+        return f'НЕ Е ИЗБРАНА СТАЯ'
+    title.fget.short_description = "Стая"
+
+    @property
+    def price_currency(self):
+        return f"{self.price} лв."
+    price_currency.fget.short_description = "Крайна цена"
 
     @admin.display(boolean=True, description="С")
     def status_admin(self):
@@ -114,28 +158,12 @@ class Reservation(models.Model):
         check_out = self.check_out
         return check_out.strftime(ADMIN_LIST_DISPLAY_DATE_FORMAT)
 
-    @property
-    def calc_days(self):
-        return abs(self.check_in.date() - self.check_out).days
-    calc_days.fget.short_description = 'Нощувки'
-
-    @property
-    def title(self):
-        if isinstance(self.room, Room):
-            return f'Стая №{self.room.id}'
-        return f'НЕ Е ИЗБРАНА СТАЯ'
-    title.fget.short_description="Стая"
-
-    @property
-    def price_currency(self):
-        return f"{self.price} лв."
-    price_currency.fget.short_description = "Цена"
-
     def is_room_busy(self):
-        return Reservation.objects.exclude(id=self.id).filter(
+        sql = Reservation.objects.exclude(id=self.id).filter(
             (Q(check_in__range=(self.check_in, self.check_out)) & Q(room=self.room))
-            | (Q(check_out__range=(self.check_in, self.check_out)) & Q(room=self.room))
+            | (Q(check_out__range=(self.check_in + timedelta(days=1), self.check_out)) & Q(room=self.room))
             | (Q(check_in__lte=self.check_in, check_out__gt=self.check_out)) & Q(room=self.room)).last()
+        return sql
 
     def clean(self):
         validators.validate_dates(self)
@@ -176,12 +204,20 @@ class Reviews(models.Model):
     review_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=30, verbose_name="Име")
     pros = models.TextField(verbose_name='Предимства')
-    cons = models.TextField(verbose_name='Недостатъци')
-    score = models.CharField(max_length=5, verbose_name='Оценка')
+    cons = models.TextField(verbose_name='Недостатъци', blank=True, null=True)
+    score = models.FloatField(max_length=5, verbose_name='Оценка')
+    date = models.DateTimeField(verbose_name="Дата на отзива")
+    check_in = models.DateField(verbose_name="Настанен")
+    check_out = models.DateField(verbose_name="Напуснал")
+    room = models.CharField(max_length=30, verbose_name="Стая")
+
+    @property
+    def stars(self):
+        return self.score / 2
 
     class Meta:
-        verbose_name = 'Ревю'
-        verbose_name_plural = '8. Ревюта'
+        verbose_name = 'Отзив'
+        verbose_name_plural = '8. Отзиви'
 
     def __str__(self):
         return self.name
@@ -203,10 +239,6 @@ class PageSection(models.Model):
     section_title = models.CharField(max_length=150, blank=True)
     section_description = models.TextField(blank=True)
     page = models.ForeignKey(Page, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = "Секция"
-        verbose_name_plural = "Секции"
 
     def __str__(self):
         return self.section_title
@@ -253,5 +285,5 @@ class Contact(models.Model):
         return f"Запитване от {self.name} ( {self.email} )"
 
     class Meta:
-        verbose_name = 'Съобщения'
-        verbose_name_plural = '2. Съобщения'
+        verbose_name = 'Запитване'
+        verbose_name_plural = '2. Запитвания'

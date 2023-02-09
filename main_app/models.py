@@ -104,7 +104,7 @@ class Reservation(models.Model):
     phone = models.CharField(max_length=25, verbose_name="Телефон за връзка")
     email = models.EmailField(blank=True, null=True, verbose_name="Имейл")
     check_in = models.DateTimeField(verbose_name="Настаняване", default=af.default_check_in, help_text="Ако няма час на пристигане остави 14:00")
-    check_out = models.DateField(verbose_name="Напускане", default=af.default_check_out)
+    check_out = models.DateTimeField(verbose_name="Напускане", default=af.default_check_out)
     adults = models.PositiveIntegerField(verbose_name="Брой възрастни")
     children = models.PositiveIntegerField(verbose_name="Брой деца", blank=True, null=True, default=0, help_text="над 2г.")
     description = models.TextField(verbose_name='Коментар', blank=True, null=True)
@@ -121,7 +121,7 @@ class Reservation(models.Model):
 
     @property
     def calc_days(self):
-        return abs(self.check_in.date() - self.check_out).days
+        return abs(self.check_in.date() - self.check_out.date()).days
     calc_days.fget.short_description = 'Нощувки'
 
     @property
@@ -133,7 +133,7 @@ class Reservation(models.Model):
 
     @property
     def price_currency(self):
-        return f"{self.price} лв."
+        return f"{self.price:.2f}"
     price_currency.fget.short_description = "Крайна цена"
 
     @admin.display(boolean=True, description="С")
@@ -180,7 +180,7 @@ class Reservation(models.Model):
             validators.is_room_busy(is_room_busy)
             validators.is_room_capacity_exceeded(self)
         else:
-            validators.is_room_choosen(self)
+            validators.is_room_chosen(self)
 
     class Meta:
         verbose_name = "Резервация"

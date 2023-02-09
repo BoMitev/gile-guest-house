@@ -43,9 +43,10 @@ def calculate_reservation_price(reservation):
         discount = reservation.discount
 
     obj = RoomPrice.objects.get(room=reservation.room, persons=reservation.total_guests)
+
     formula = reservation.calc_days * (obj.price + discount)
 
-    return round(formula, 1)
+    return round(formula, 2)
 
 
 def load_reviews():
@@ -173,7 +174,7 @@ def send_notification_email(reservation):
     Име: {reservation.name},
     Брой гости: {reservation.total_guests},
     От: {reservation.check_in.date()},
-    До: {reservation.check_out},
+    До: {reservation.check_out.date()},
     Нощувки: {reservation.calc_days},
     Телефон: {reservation.phone}"""
         if reservation.email:

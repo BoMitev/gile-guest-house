@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action, link, view
 from django.contrib import admin
 from django.contrib.auth.models import Group
@@ -70,13 +70,12 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     ordering = ('confirm', 'check_in', 'check_out', 'room_id')
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        for reservation in qs:
-            check_out = datetime.strptime(reservation.check_out.strftime('%Y-%m-%d 12:00:00'), '%Y-%m-%d %H:%M:%S')
-            if check_out < datetime.today():
-                reservation.archived = True
-                reservation.save()
-        return qs.filter(archived=False)
+        # qs = Reservation.objects.all()
+        # for reserv in qs:
+        #     reserv.check_out = reserv.check_out.strftime('%Y-%m-%d 12:00:00')
+        #     reserv.save()
+
+        return Reservation.objects.filter(check_out__gte=datetime.today())
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(ReservationAdmin, self).get_form(request, obj, **kwargs)
@@ -138,7 +137,7 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                 ('Резервация на:', {
                     'fields': (('room', 'id'), ('name', 'phone', 'email'),
                                ('check_in', 'check_out'), ('adults', 'children'),
-                               'description', ('price_currency', 'discount',), ('archived',))
+                               'description', ('price_currency', 'discount',))
                 }),
             )
 
@@ -149,34 +148,9 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             ('Резервация на:', {
                 'fields': ('room', ('name', 'phone', 'email'),
                            ('check_in', 'check_out'), ('adults', 'children'),
-                           'description', ('price_currency', 'discount',), ('archived',))
+                           'description', ('price_currency', 'discount',))
             }),
         )
-
-    # @button(html_attrs={'style': 'background-color:#DBC913;color:black'})
-    # def load(self, request):
-    #     reservations = af.load_reservations()
-    #     for reservation in reservations:
-    #         reservation_id = reservation['id']
-    #         name = reservation['name']
-    #         phone = reservation['phone']
-    #         adults = reservation['adults']
-    #         children = reservation['children']
-    #         check_in = reservation['check_in']
-    #         check_out = reservation['check_out']
-    #         price = reservation['price']
-    #         room = Room.objects.get(pk=reservation['room'])
-    #         try:
-    #             Reservation.objects.update_or_create(external_id=reservation_id,
-    #                                                  defaults={"room": room, "price": price, "name": name,
-    #                                                            "phone": phone,
-    #                                                            "adults": adults, "children": children,
-    #                                                            "check_in": check_in, "check_out": check_out,
-    #                                                            "confirm": True})
-    #         except Exception as ex:
-    #             pass
-    #     self.message_user(request, 'Зареждане от Google Календар')
-    #     return
 
 
 @admin.register(ArchivedReservation)
@@ -199,8 +173,7 @@ class ArchivedReservationAdmin(admin.ModelAdmin):
         return False
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.filter(archived=True)
+        return Reservation.objects.filter(check_out__lt=datetime.today())
 
     fieldsets = (
         ('Резервация на:', {

@@ -147,7 +147,7 @@ def create_email(reservation):
 					 <span style="font-family: Menlo, Consolas, monospace; font-weight: 600; color: #cbd5e0; font-size: 18px; letter-spacing: -1px; width:2%">&gt;&gt;&gt;</span>
 				  <span style="float:right; width:40%; text-align:right">
                     <p class="all-font-roboto" style="margin: 0; margin-bottom: 4px; color: #a0aec0; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Напускане</p>
-                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_out}</p>
+                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_out.date()}</p>
 					</span>
                   </td>
                 </tr>

@@ -1,10 +1,35 @@
 import inspect
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from hotel_gile.main_app.models import TermWorkList, Page, PageSection, Room, HeroGallery, \
     Reviews, Gallery, RoomPrice
 from hotel_gile.main_app.forms import ContactForm, ReservationForm
 import hotel_gile.main_app.language_config as lang_config
 import hotel_gile.main_app.auxiliary_functions as aux_func
+
+
+@login_required
+def calc_price(request):
+    room = int(request.GET.get('room'))
+    total_guests = int(request.GET.get('guests'))
+    nights = int(request.GET.get('nights'))
+
+    if not request.GET.get('discount'):
+        discount = 0
+    else:
+        discount = float(request.GET.get('discount'))
+
+    if room < 1 or nights < 1:
+        return HttpResponse(0)
+
+    room_obj = Room.objects.get(id=room)
+    if total_guests > room_obj.room_capacity:
+        return HttpResponse("Недостатъчен капацитет")
+
+    request.room, request.total_guests, request.calc_days, request.discount = room, total_guests, nights, discount
+    price = aux_func.calculate_reservation_price(request)
+    return HttpResponse(f"{price:.2f}")
 
 
 def view_404(request):

@@ -9,13 +9,13 @@ def is_room_capacity_exceeded(reservation):
                                })
 
 
-def is_room_choosen(reservation):
+def is_room_chosen(reservation):
     if reservation.confirm:
         raise ValidationError({"room": "* Изберете стая за да потвърдите резервацията."})
 
 
 def validate_dates(reservation):
-    if reservation.check_in.date() >= reservation.check_out:
+    if reservation.check_in.date() >= reservation.check_out.date():
         raise ValidationError({"check_in": "Датата на настаняване трябва да е преди датата на напускане.",
                                "check_out": ""})
 

@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.urls import path, re_path
 from django.views.static import serve
-from hotel_gile.main_app.views import change_session_language, rooms, contacts, gallery, home, view_404
+from hotel_gile.main_app.views import change_session_language, rooms, contacts, gallery, home, view_404, calc_price
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin

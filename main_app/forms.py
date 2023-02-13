@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import datetime
-
+import hotel_gile.main_app.auxiliary_functions as af
 from hotel_gile import settings
 from hotel_gile.main_app.models import Contact, Reservation
 
@@ -11,8 +11,7 @@ ADULTS_CHOOSES = (
     (2, "2"),
     (3, "3"),
     (4, "4"),
-    (5, "5"),
-    (6, "6")
+    (5, "5")
 )
 CHILDREN_CHOOSES = (
     (0, ""),
@@ -38,6 +37,9 @@ class ReservationForm(forms.ModelForm):
         model = Reservation
         fields = ('name', 'phone', 'email','check_in', 'check_out', 'adults', 'children')
 
+    def clean(self):
+        af.send_notification_email(self)
+
     def clean_check_in(self):
         check_in = datetime.combine(self.cleaned_data['check_in'], datetime.strptime("14:00:00", '%H:%M:%S').time())
         return check_in
@@ -55,7 +57,6 @@ class ReservationForm(forms.ModelForm):
         import phonenumbers
 
         phone_number = self.cleaned_data['phone']
-
         try:
             if phone_number.startswith('00'):
                 my_number = phonenumbers.parse("+" + phone_number[2:])

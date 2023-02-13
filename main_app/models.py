@@ -133,7 +133,7 @@ class Reservation(models.Model):
 
     @property
     def price_currency(self):
-        return f"{self.price:.2f}"
+        return f"{self.price:.2f} лв."
     price_currency.fget.short_description = "Крайна цена"
 
     @admin.display(boolean=True, description="С")
@@ -171,9 +171,6 @@ class Reservation(models.Model):
 
         if self.children is None:
             self.children = 0
-
-        if not self.pk and not self.room:
-            af.send_notification_email(self)
 
         if self.room:
             is_room_busy = self.is_room_busy()

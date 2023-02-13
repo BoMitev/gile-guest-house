@@ -82,7 +82,7 @@ def event_template(obj):
             'timeZone': 'Europe/Sofia',
         },
         'end': {
-            'date': f'{obj.check_out}',
+            'date': f'{obj.check_out.date()}',
             'timeZone': 'Europe/Sofia',
         },
     }

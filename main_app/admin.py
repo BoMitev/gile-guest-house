@@ -159,6 +159,8 @@ class ArchivedReservationAdmin(admin.ModelAdmin):
     list_display = ('title', 'name', 'calc_days', 'check_in_admin', 'check_out_admin', 'added_on_admin',
                     'price_currency')
     search_fields = ['name__icontains', 'id__iexact', 'check_in__icontains', 'check_out__icontains']
+    list_per_page = 15
+    ordering = ('-check_in', '-check_out', 'room_id')
     exclude = ('id',)
 
     def has_delete_permission(self, request, obj=None):

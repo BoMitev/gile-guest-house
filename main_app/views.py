@@ -3,10 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from hotel_gile.main_app.models import TermWorkList, Page, PageSection, Room, HeroGallery, \
-    Reviews, Gallery, RoomPrice
+    Reviews, Gallery
 from hotel_gile.main_app.forms import ContactForm, ReservationForm
 import hotel_gile.main_app.language_config as lang_config
-import hotel_gile.main_app.auxiliary_functions as aux_func
+import hotel_gile.main_app.auxiliary_functions as af
 
 
 @login_required
@@ -15,21 +15,20 @@ def calc_price(request):
     total_guests = int(request.GET.get('guests'))
     nights = int(request.GET.get('nights'))
 
-    if not request.GET.get('discount'):
-        discount = 0
-    else:
+    discount = 0
+    if request.GET.get('discount'):
         discount = float(request.GET.get('discount'))
 
-    if room < 1 or nights < 1:
-        return HttpResponse(0)
+    if room < 1 or nights < 1 or total_guests < 1:
+        return HttpResponse(f"0.00 лв.")
 
     room_obj = Room.objects.get(id=room)
     if total_guests > room_obj.room_capacity:
         return HttpResponse("Недостатъчен капацитет")
 
     request.room, request.total_guests, request.calc_days, request.discount = room, total_guests, nights, discount
-    price = aux_func.calculate_reservation_price(request)
-    return HttpResponse(f"{price:.2f}")
+    price = af.calculate_reservation_price(request)
+    return HttpResponse(f"{price:.2f} лв.")
 
 
 def view_404(request):
@@ -46,7 +45,7 @@ def change_session_language(request):
 
 
 def home(request):
-    language = aux_func.get_session_language(request.session)
+    language = af.get_session_language(request.session)
     page_dynamics = TermWorkList.objects.get(language=language)
     page_data = Page.objects.get(page_name="Home", language=language)
     page_sections = PageSection.objects.filter(page__exact=page_data).all()
@@ -79,7 +78,7 @@ def home(request):
 
 
 def rooms(request):
-    language = aux_func.get_session_language(request.session)
+    language = af.get_session_language(request.session)
     page_dynamics = TermWorkList.objects.get(language=language)
     rooms = Room.objects.all()
 
@@ -95,7 +94,7 @@ def rooms(request):
 
 
 def contacts(request):
-    language = aux_func.get_session_language(request.session)
+    language = af.get_session_language(request.session)
     page_dynamics = TermWorkList.objects.get(language=language)
 
     context = {
@@ -117,9 +116,9 @@ def contacts(request):
 
 
 def gallery(request):
-    language = aux_func.get_session_language(request.session)
+    language = af.get_session_language(request.session)
     page_dynamics = TermWorkList.objects.get(language=language)
-    images = Gallery.objects.all()
+    images = Gallery.objects.all().order_by('-pk')
 
     context = {
         'page_title': lang_config.STATICS[language]['menu'][inspect.stack()[0][3]],

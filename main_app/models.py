@@ -114,6 +114,7 @@ class Reservation(models.Model):
     added_on = models.DateTimeField(verbose_name='Резервирана на', blank=True, default=datetime.now)
     archived = models.BooleanField(default=False, blank=True, choices=BOOL_CHOICES, verbose_name="Архивиране",
                                    help_text="Резервациите се архивират автоматично, след като изтече датата на напускане!")
+    email_sent = models.BooleanField(default=False)
 
     @property
     def total_guests(self):

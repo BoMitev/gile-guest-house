@@ -113,8 +113,8 @@ class ReservationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                 obj.price = 0
 
             if obj.confirm:
-                if "confirm" in form.changed_data and obj.email:
-                    af.send_confirmation_email(obj)
+                if not obj.email_sent and obj.email:
+                    obj.email_sent = af.send_confirmation_email(obj)
 
                 if obj.external_id:
                     af.update_reservation(obj)

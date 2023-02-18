@@ -159,6 +159,9 @@ def send_confirmation_email(reservation):
         session.quit()
     except Exception as ex:
         print(ex)
+        return False
+    finally:
+        return True
 
 
 def send_notification_email(reservation):
@@ -171,14 +174,15 @@ def send_notification_email(reservation):
         session.starttls()
         session.login(SMTP_USER, SMTP_PASSWORD)
         msg = f"""Получихте нова резервация.
-    Име: {reservation.name},
-    Брой гости: {reservation.total_guests},
-    От: {reservation.check_in.date()},
-    До: {reservation.check_out.date()},
-    Нощувки: {reservation.calc_days},
-    Телефон: {reservation.phone}"""
-        if reservation.email:
-            msg += f",\nEmail: {reservation.email}"
+    Име: {reservation.cleaned_data['name']},
+    Брой гости: {reservation.cleaned_data['adults'] + reservation.cleaned_data['children']},
+    Брой стаи: {reservation.cleaned_data['rooms']},
+    От: {reservation.cleaned_data['check_in'].date()},
+    До: {reservation.cleaned_data['check_out'].date()},
+    Нощувки: {reservation.instance.calc_days},
+    Телефон: {reservation.cleaned_data['phone']}"""
+        if reservation.cleaned_data['email']:
+            msg += f",\nEmail: {reservation.cleaned_data['email']}"
 
         message = MIMEText(msg, 'plain')
         message['Subject'] = "Нова резервация"

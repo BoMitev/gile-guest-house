@@ -3,6 +3,7 @@ STATICS = {
     'bg': {
         'validations':{
             'check_out': 'Датата на настаняване трябва да е след датата на напускане.',
+            'adults': 'Броят на гостите трябва да е по-голям от броят на стаите.',
             'email': 'Невалиден имейл адрес',
             'phone': 'Невалиден номер',
         },
@@ -27,6 +28,7 @@ STATICS = {
                     'check_out': 'Напускане',
                     'adults': 'Възрастни',
                     'children': 'Деца',
+                    'rooms': 'Стаи',
                     'check_availability': 'Провери наличност',
                     'sub': '* Безплатно настаняване на деца до 2г. при използване на текущите легла.',
                 },
@@ -79,6 +81,7 @@ STATICS = {
     'en': {
         'validations': {
             'check_out': 'Check out date must be greater than check in date',
+            'adults': 'Number of guests must be more than number of rooms',
             'email': 'Invalid email address',
             'phone': 'Invalid phone number',
         },
@@ -103,6 +106,7 @@ STATICS = {
                     'check_out': 'Check-out',
                     'adults': 'Adults',
                     'children': 'Children',
+                    'rooms': 'Rooms',
                     'check_availability': 'Check availability',
                     'sub': '* All children under 2 years stay free of charge when using existing beds.',
                 },

@@ -59,7 +59,14 @@
                                     <label for {{ reservation_form.children.id_for_label }}>{{ page_statics.page.home.book_form.children }}:</label>
                                     {{ reservation_form.children }}
                                 </div>
+                                <div class="select-option">
+                                    <label for {{ reservation_form.rooms.id_for_label }}>{{ page_statics.page.home.book_form.rooms }}:</label>
+                                    {{ reservation_form.rooms }}
+                                </div>
                             </div>
+                            {% if reservation_form.adults.errors %}
+                                <sup>{{ page_statics.validations.adults }}</sup><br/>
+                            {% endif %}
                             <sub>{{ page_statics.page.home.book_form.sub }}</sub>
                             <button type="submit">{{ page_statics.page.home.book_form.check_availability }}</button>
                         </form>
@@ -175,10 +182,10 @@
                                 <div class="hr-text">
                                    {% if language == 'bg' %}
                                          <h3>{{ room.title }}</h3>
-                                       <h2><span>от </span>{{ room.min_price }}<span> до </span>{{ room.price }}<span> лв/ {{ page_statics.page.rooms.rooms_terms.0 }}</span>
+                                       <h2><span>от </span>{{ room.min_price|floatformat:"0" }}<span> до </span>{{ room.max_price|floatformat:"0" }}<span> лв/ {{ page_statics.page.rooms.rooms_terms.0 }}</span>
                                     {% else %}
                                          <h3>{{ room.title_en }}</h3>
-                                       <h2><span>from </span>{{ room.min_price }}<span> to </span>{{ room.price }}<span> BGN/ {{ page_statics.page.rooms.rooms_terms.0 }}</span>
+                                       <h2><span>from </span>{{ room.min_price|floatformat:"0" }}<span> to </span>{{ room.max_price|floatformat:"0" }}<span> BGN/ {{ page_statics.page.rooms.rooms_terms.0 }}</span>
                                     {% endif %}
                                     </h2>
                                     <table>
@@ -230,16 +237,19 @@
                         {% for review in reviews %}
                             <div class="ts-item">
                                 {% if review.pros %}
-                                    <p><b>Pros:</b> {{ review.pros }}</p>
+                                    <p><b>Pros:</b> {{ review.pros|truncatewords:40 }}</p>
                                 {% endif %}
                                 {% if review.cons %}
-                                    <p><b>Cons:</b> {{ review.cons }}</p>
+                                    <p><b>Cons:</b> {{ review.cons|truncatewords:40 }}</p>
                                 {% endif %}
                                 <div class="ti-author">
                                     <div class="rating">
-                                        {% for i in review.score %}
+                                        {% for i in "x"|rjust:review.stars %}
                                             <i class="icon_star"></i>
                                         {% endfor %}
+                                        {% if not review.score|divisibleby:2 %}
+                                             <i class="icon_star-half"></i>
+                                        {% endif %}
                                     </div>
                                     <h5> - {{ review.name }}</h5>
                                 </div>
@@ -250,11 +260,42 @@
             </div>
         </div>
     </section>
+
+    <script>
+        function calculateMaxCapacity(button) {
+            let max_capacity = 23;
+            let adults = document.getElementById("adults");
+            let children = document.getElementById("childs");
+            let rooms = document.getElementById('rooms');
+            let totalGuests = parseInt(adults.value) + (parseInt(children.value) | 0);
+
+            if (totalGuests > max_capacity) {
+                if (button.id === "adults") {
+                    children.value = max_capacity - adults.value
+                } else if (button.id === "childs") {
+                    adults.value = max_capacity - children.value
+                }
+            }
+
+            while ((parseInt(adults.value) + (parseInt(children.value)|0)) > rooms.value) {
+                if (rooms.selectedIndex < rooms.length - 1) {
+                    rooms.selectedIndex += 1;
+                }
+
+            }
+
+            $('select').niceSelect('update');
+
+        }
+
+
+    </script>
+
     {% if reservation_submited %}
         <div id="snackbar" class="show">{{ page_statics.snackbar.booking }}</div>
         <script>
             window.onload = function () {
-                var x = document.getElementById("snackbar");
+                let x = document.getElementById("snackbar");
                 x.className = "show";
                 setTimeout(function () {
                     x.className = x.className.replace("show", "");

@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from datetime import datetime
 import hotel_gile.main_app.auxiliary_functions as af
 from hotel_gile import settings
-from hotel_gile.main_app.models import Contact, Reservation, Room
+from hotel_gile.main_app.models import Contact, Reservation, Room, ReservedRooms
 
 ROOMS = Room.objects.all().order_by('-room_capacity')
 capacity = 0
@@ -21,7 +21,7 @@ CHILD_CHOISES = [(i, i) for i in range(0, 23)]
 class ReservationForm(forms.ModelForm):
     name = forms.CharField(max_length=200, widget=forms.TextInput(attrs={'class': 'input', 'id': 'name'}))
     phone = forms.CharField(max_length=30,
-                            widget=forms.TextInput(attrs={'class': 'input', 'id': 'phone', 'inputmode': 'tel'}))
+                            widget=forms.TextInput(attrs={'class': 'input', 'id': 'phone', 'inputmode': 'tel', 'placeholder':'+359...'}))
     email = forms.EmailField(widget=forms.TextInput(attrs={'id': 'email', 'inputmode': 'email'}))
     check_in = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,
                                widget=forms.TextInput(
@@ -29,7 +29,7 @@ class ReservationForm(forms.ModelForm):
     check_out = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,
                                 widget=forms.TextInput(
                                     attrs={'class': 'check_out', 'id': 'date-out', 'inputmode': 'none'}))
-    children =  forms.ChoiceField(choices=CHILD_CHOISES, label="",
+    children = forms.ChoiceField(choices=CHILD_CHOISES, label="",
                               widget=forms.Select(attrs={'id': 'childs', 'onchange': 'calculateMaxCapacity(this)'}), required=False)
     adults = forms.ChoiceField(choices=ADULTS_CHOISES, label="",
                               widget=forms.Select(attrs={'id': 'adults', 'onchange': 'calculateMaxCapacity(this)'}))
@@ -41,32 +41,40 @@ class ReservationForm(forms.ModelForm):
         fields = ('name', 'phone', 'email', 'check_in', 'check_out', 'adults', 'children')
 
     def save(self, commit=True):
-        total_guests = int(self.cleaned_data['adults']) + int(self.cleaned_data['children'])
-        rooms = self.cleaned_data['rooms']
-
-        reservations = []
-        while total_guests > 0:
-            room_guest = int(total_guests / rooms)
-            total_guests -= room_guest
+        adults = int(self.cleaned_data['adults'])
+        children = int(self.cleaned_data['children'])
+        rooms = int(self.cleaned_data['rooms'])
+        reservation = Reservation.objects.create(
+                                                name=self.cleaned_data['name'],
+                                                phone=self.cleaned_data['phone'],
+                                                email=self.cleaned_data['email'],
+                                                check_in=self.cleaned_data['check_in'],
+                                                check_out=self.cleaned_data['check_out'],
+                                                )
+        all_rooms = []
+        while rooms > 0:
+            tmp_adults = int(adults / rooms)
+            tmp_children = int(children / rooms)
+            adults -= tmp_adults
+            children -= tmp_children
             rooms -= 1
 
-            reservations.append(
-                Reservation(
-                    name=self.cleaned_data['name'],
-                    phone=self.cleaned_data['phone'],
-                    email=self.cleaned_data['email'],
-                    check_in=self.cleaned_data['check_in'],
-                    check_out=self.cleaned_data['check_out'],
-                    adults=room_guest
+            all_rooms.append(
+                ReservedRooms(
+                    reservation=reservation,
+                    adults=tmp_adults,
+                    children=tmp_children
                 )
             )
-        Reservation.objects.bulk_create(reservations, ignore_conflicts=True)
+        ReservedRooms.objects.bulk_create(all_rooms, ignore_conflicts=True)
 
     def clean(self):
         if (self.cleaned_data['adults'] + self.cleaned_data['children']) < self.cleaned_data['rooms']:
             raise ValidationError({"adults": ""})
 
-        af.send_notification_email(self)
+        import threading
+        threading.Thread(target=af.send_notification_email, args=(self,)).start()
+        threading.Thread(target=af.send_client_notification_email, args=(self,)).start()
 
     def clean_name(self):
         return self.cleaned_data['name'].title()
@@ -108,7 +116,6 @@ class ReservationForm(forms.ModelForm):
             status = phonenumbers.is_possible_number(my_number)
         except Exception as ex:
             status = False
-
         if not status:
             raise ValidationError('')
 
@@ -123,3 +130,6 @@ class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
         fields = "__all__"
+
+    def clean(self):
+        af.send_notification_email(self)

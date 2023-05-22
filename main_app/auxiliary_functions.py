@@ -1,10 +1,11 @@
 import smtplib
-import datetime
+from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from django.contrib.auth.models import User
 from hotel_gile.settings import SMTP_USER, SMTP_PASSWORD
 from hotel_gile.main_app.api_secrets import api_secrets as secrets
+import hotel_gile.main_app.create_email_template as email
 
 
 def get_session_language(session):
@@ -17,36 +18,21 @@ def get_session_language(session):
 
 
 def default_check_in():
-    today = datetime.datetime.today()
+    today = datetime.today()
     year = int(today.strftime("%Y"))
     month = int(today.strftime("%m"))
     day = int(today.strftime("%d"))
 
-    return datetime.datetime(year, month, day, 14, 00)
+    return datetime(year, month, day, 14, 00)
 
 
 def default_check_out():
-    today = datetime.datetime.today()
+    today = datetime.today()
     year = int(today.strftime("%Y"))
     month = int(today.strftime("%m"))
     day = int(today.strftime("%d"))
 
-    return datetime.datetime(year, month, day, 12, 00) + datetime.timedelta(days=1)
-
-
-def calculate_reservation_price(reservation):
-    from hotel_gile.main_app.models import RoomPrice
-
-    if not reservation.discount:
-        discount = 0
-    else:
-        discount = reservation.discount
-
-    obj = RoomPrice.objects.get(room=reservation.room, persons=reservation.total_guests)
-
-    formula = reservation.calc_days * (obj.price + discount)
-
-    return round(formula, 2)
+    return datetime(year, month, day, 12, 00) + timedelta(days=1)
 
 
 def load_reviews():
@@ -63,26 +49,28 @@ def load_reviews():
 
 # ======== RESERVATIONS ==========
 
-def event_template(obj):
-    temp_object = datetime.datetime.strptime("14:00:00", '%H:%M:%S').time()
+def event_template(reservation, rooms):
+    temp_object = datetime.strptime("14:00:00", '%H:%M:%S').time()
     check_in_time = ""
-    if obj.check_in.time() != temp_object:
-        check_in_time = f'Час на пристигане: {obj.check_in.time()}\n'
+    if reservation.check_in.time() != temp_object:
+        check_in_time = f'Час на пристигане: {reservation.check_in.time()}\n'
+
+    description = f'{reservation.name.title()} / {reservation.phone}\n'
+
+    for room in rooms:
+        description += f'{room.title}\n{room.adults}+{room.clean_children()} човека\n{room.stay} x {room.total_price/room.stay:.2f} = {room.total_price:.2f}лв.\n\n'
+    description += f'{check_in_time}{reservation.description}'
 
     result = {
-        'summary': obj.title,
-        'description': f'{obj.name} / {obj.phone}\n'
-                       f'{obj.adults}+{obj.children} човека\n'
-                       f'{obj.calc_days} x {obj.price/obj.calc_days:.2f} = {obj.price:.2f}лв.\n'
-                       f'{check_in_time}'
-                       f'{obj.description}',
-        'colorId': str(obj.room.id),
+        'summary': reservation.title,
+        'description': description,
+        'colorId': str(rooms[0].room.id),
         'start': {
-            'date': f'{obj.check_in.date()}',
+            'date': f'{reservation.check_in.date()}',
             'timeZone': 'Europe/Sofia',
         },
         'end': {
-            'date': f'{obj.check_out.date()}',
+            'date': f'{reservation.check_out.date()}',
             'timeZone': 'Europe/Sofia',
         },
     }
@@ -90,61 +78,36 @@ def event_template(obj):
     return result
 
 
-def send_reservation(obj):
-    service = secrets.reservation_api_secrets()
-    event = event_template(obj)
-    event = service.events().insert(calendarId='primary', body=event).execute()
-
-    return event['id']
-
-
-def update_reservation(obj):
-    service = secrets.reservation_api_secrets()
-    event = event_template(obj)
-    service.events().update(calendarId='primary', eventId=obj.external_id, body=event).execute()
-
-
-def delete_reservation(obj):
-    service = secrets.reservation_api_secrets()
-    service.events().delete(calendarId='primary', eventId=obj.external_id).execute()
+def send_update_reservation(reservation, rooms):
+    if reservation.status > 0:
+        service = secrets.reservation_api_secrets()
+        event = event_template(reservation, rooms)
+        if reservation.external_id:
+            pass
+            #service.events().update(calendarId='primary', eventId=reservation.external_id, body=event).execute()
+        else:
+            pass
+            #response = service.events().insert(calendarId='primary', body=event).execute()
+            #reservation.external_id = response['id']
+            #reservation.save()
 
 
-# def load_reservations():
-#     service = secrets.reservation_api_secrets()
-#
-#     today = datetime.today().isoformat("T", "seconds") + "Z"
-#     # end = (today + timedelta(days=90)).isoformat("T", "seconds") + "Z"
-#
-#     reservations = []
-#     while True:
-#         events = service.events().list(calendarId='gileood@gmail.com', timeMin=today).execute()
-#         for event in events['items']:
-#             details = event["description"].split("/")
-#             price = re.search('\d+', details[3])
-#             room = re.search('\d+', event['summary'])
-#             adults, children = details[2].split("+")
-#             reservations.append(
-#                 {"id": event["id"],
-#                  "room": int(room.group(0)),
-#                  "name": details[0],
-#                  "phone": details[1],
-#                  "adults": adults,
-#                  "children": children,
-#                  "price": int(price.group(0)),
-#                  'check_in': event['start']['dateTime'].split("+")[0],
-#                  'check_out': event['end']['dateTime'].split("+")[0]
-#                  })
-#         page_token = events.get('nextPageToken')
-#         if not page_token:
-#             break
-#
-#     return reservations
+def delete_reservation(reservation):
+    if reservation.external_id:
+        try:
+            service = secrets.reservation_api_secrets()
+            #service.events().delete(calendarId='primary', eventId=reservation.external_id).execute()
+        except Exception as ex:
+            print(ex)
+        finally:
+            pass
+            #reservation.external_id = None
+            #reservation.save()
 
 
 # ================ EMAIL ===============
 
-def send_confirmation_email(reservation):
-    import hotel_gile.main_app.create_email_template as email
+def send_confirmation_email(reservation, all_rooms):
     try:
         session = smtplib.SMTP('mail.gile.house', 25)
         session.starttls()
@@ -152,19 +115,41 @@ def send_confirmation_email(reservation):
         message = MIMEMultipart('alternative')
         message['Subject'] = f'Потвърдена резервация/ Confirmed reservation'
         message['From'] = f'Guest House GILE<{SMTP_USER}>'
-        msg = MIMEText(email.create_email(reservation), 'html')
+        msg = MIMEText(email.confirm_email(reservation, all_rooms), 'html')
 
         message.attach(msg)
-        session.sendmail(SMTP_USER, reservation.email, message.as_string())
-        session.quit()
+        session.sendmail(SMTP_USER, [reservation.email, "guest@gile.house"], message.as_string())
     except Exception as ex:
         print(ex)
         return False
-    finally:
+    else:
+        reservation.email_sent = True
         return True
+    finally:
+        session.quit()
+        reservation.save()
 
 
-def send_notification_email(reservation):
+def send_reject_email(reservation):
+    try:
+        session = smtplib.SMTP('mail.gile.house', 25)
+        session.starttls()
+        session.login(SMTP_USER, SMTP_PASSWORD)
+        message = MIMEMultipart('alternative')
+        message['Subject'] = f'Отхвърлена резервация/ Services unavailable'
+        message['From'] = f'Guest House GILE<{SMTP_USER}>'
+        msg = MIMEText(email.reject_email(reservation), 'html')
+        message.attach(msg)
+        session.sendmail(SMTP_USER, reservation.email, message.as_string())
+    except Exception as ex:
+        print(ex)
+    finally:
+        session.quit()
+
+
+def send_notification_email(event):
+    from hotel_gile.main_app.forms import ContactForm, ReservationForm
+
     staff_email_list = [x[0] for x in User.objects.filter(is_staff=True).values_list('email') if x[0]]
     if not staff_email_list:
         return
@@ -173,21 +158,64 @@ def send_notification_email(reservation):
         session = smtplib.SMTP('mail.gile.house', 25)
         session.starttls()
         session.login(SMTP_USER, SMTP_PASSWORD)
-        msg = f"""Получихте нова резервация.
-    Име: {reservation.cleaned_data['name']},
-    Брой гости: {reservation.cleaned_data['adults'] + reservation.cleaned_data['children']},
-    Брой стаи: {reservation.cleaned_data['rooms']},
-    От: {reservation.cleaned_data['check_in'].date()},
-    До: {reservation.cleaned_data['check_out'].date()},
-    Нощувки: {reservation.instance.calc_days},
-    Телефон: {reservation.cleaned_data['phone']}"""
-        if reservation.cleaned_data['email']:
-            msg += f",\nEmail: {reservation.cleaned_data['email']}"
+        if isinstance(event, ReservationForm):
+            msg = f"""Получихте нова резервация.
+Име: {event.cleaned_data['name']},
+Брой гости: {event.cleaned_data['adults'] + event.cleaned_data['children']},
+Брой стаи: {event.cleaned_data['rooms']},
+От: {event.cleaned_data['check_in'].date().strftime("%d.%m.%Y")},
+До: {event.cleaned_data['check_out'].date().strftime("%d.%m.%Y")},
+Нощувки: {abs(event.cleaned_data['check_in'].date() - event.cleaned_data['check_out'].date()).days},
+Телефон: {event.cleaned_data['phone']}"""
+            if event.cleaned_data['email']:
+                msg += f",\nEmail: {event.cleaned_data['email']}"
 
-        message = MIMEText(msg, 'plain')
-        message['Subject'] = "Нова резервация"
-        message['From'] = f'* Reservation - Guest House GILE<{SMTP_USER}>'
+            message = MIMEText(msg, 'plain')
+            message['Subject'] = "Нова резервация"
+            message['From'] = f'* Reservation - Guest House GILE<{SMTP_USER}>'
+        elif isinstance(event, ContactForm):
+            msg = f"""Получихте ново запитване. 
+Име: {event.cleaned_data['name']},
+Имейл: {event.cleaned_data['email']},
+Запитване: {event.cleaned_data['message']}
+"""
+            message = MIMEText(msg, 'plain')
+            message['Subject'] = "Ново запитване"
+            message['From'] = f'* Contacts - Guest House GILE<{SMTP_USER}>'
+
         session.sendmail(SMTP_USER, staff_email_list, message.as_string())
-        session.quit()
+
     except Exception as ex:
         print(ex)
+    finally:
+        session.quit()
+
+
+def send_client_notification_email(reservation):
+    try:
+        session = smtplib.SMTP('mail.gile.house', 25)
+        session.starttls()
+        session.login(SMTP_USER, SMTP_PASSWORD)
+        name = reservation.cleaned_data['name']
+        email_tmp = reservation.cleaned_data['email']
+        check_in = reservation.cleaned_data['check_in'].date().strftime("%d.%m.%Y")
+        check_out = reservation.cleaned_data['check_out'].date().strftime("%d.%m.%Y")
+
+        msg = f"""Здравейте, {name},
+Получихме заявката Ви за резервация от {check_in} до {check_out}. 
+Този имейл се генерира автоматично и не означава, че престоят Ви е потвърден. Наш служител ще се свърже с вас или ще получите имейл за потвържение.
+За контакт с нас: +359 88 560 3446, guest@gile.house или на бързата ни форма в сайта.
+
+Hi, {name},
+We received your reservation request from {check_in} to {check_out}.
+This email is generated automatically and does not mean that your stay has been confirmed. A member of our staff will contact you or you will receive a confirmation email.
+To contact us: +359 88 560 3446, guest@gile.house or fill the contact form on our website.
+"""
+        message = MIMEText(msg, 'plain')
+        message['Subject'] = f'Получена заявка за резервация/ Received reservation request'
+        message['From'] = f'Guest House GILE<{SMTP_USER}>'
+        session.sendmail(SMTP_USER, email_tmp, message.as_string())
+    except Exception as ex:
+        print(ex)
+    finally:
+        session.quit()

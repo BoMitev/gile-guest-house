@@ -1,17 +1,24 @@
 from django.core.exceptions import ValidationError
 
 
-def is_room_capacity_exceeded(reservation):
-    if reservation.room.room_capacity < reservation.total_guests:
+def guests_exist(reservedroom):
+    if not reservedroom.adults:
+        raise ValidationError({"room": "Посочете броя на гостите.",
+                               "adults": "",
+                               "children": "",
+                               })
+
+
+def is_room_capacity_exceeded(reservedroom):
+    if reservedroom.room.room_capacity < reservedroom.total_guests:
         raise ValidationError({"room": "* Броят на гостите надхвърля капацита на стаята.",
                                "adults": "",
                                "children": "",
                                })
 
 
-def is_room_chosen(reservation):
-    if reservation.confirm:
-        raise ValidationError({"room": "* Изберете стая за да потвърдите резервацията."})
+def room_is_not_chosen():
+    raise ValidationError({"room": "* Изберете стая за да потвърдите резервацията."})
 
 
 def validate_dates(reservation):
@@ -20,11 +27,10 @@ def validate_dates(reservation):
                                "check_out": ""})
 
 
-def is_room_busy(is_room_busy):
-    if is_room_busy:
-        raise ValidationError({
-            "room": f"* Стая {is_room_busy.room_id} е заета от {is_room_busy.check_in.date()} до {is_room_busy.check_out}",
-            "check_in": "",
-            "check_out": ""})
+def room_is_busy(room_id):
+    raise ValidationError({
+        "room": f"* Стая {room_id} е заета за избрания период",
+        "reservation": "check_in"
+    })
 
 

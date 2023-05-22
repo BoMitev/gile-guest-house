@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ language }}" translate="no">
 {% load static %}
 <head>
 	<meta charset="UTF-8">
-	<meta name="description" content="GILE Guest House">
-	<meta name="keywords" content="GILE, guest, house, hostel, cheep, Veliko, Tarnovo, Bulgaria">
+	<meta name="description" content="{{ page_statics.title }}">
+	<meta name="keywords" content="ГИЛЕ, къща за гости, гости, хотел, хостел, Велико, Търново, евтини, нощувки, GILE, guest, house, hostel, hotel, cheep, Veliko, Tarnovo, Bulgaria">
 	<meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1">
     <meta property="og:image" content="{% static 'img/mobile_favicon.png' %}"/>
-	<title>{{ page_title }} - GILE Guest House</title>
+	<title>{{ page_title }} - {{ page_statics.title }}</title>
 	<link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css">

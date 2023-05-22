@@ -1,6 +1,7 @@
 DEFAULT_LANGUAGE = 'bg'
 STATICS = {
     'bg': {
+        'title': 'Къща за гости ГИЛЕ',
         'validations':{
             'check_out': 'Датата на настаняване трябва да е след датата на напускане.',
             'adults': 'Броят на гостите трябва да е по-голям от броят на стаите.',
@@ -79,6 +80,7 @@ STATICS = {
         },
     },
     'en': {
+        'title': 'GILE Guest House',
         'validations': {
             'check_out': 'Check out date must be greater than check in date',
             'adults': 'Number of guests must be more than number of rooms',

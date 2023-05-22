@@ -28,7 +28,17 @@
                         </a>
                     </div>
                     {% endfor %}
+
                 </div>
+            <nav>
+                  <ul class="pagination pagination-lg">
+                      {% for page in pages %}
+                        <li class="page-item {% if page == current_page %} disabled {% endif %}">
+                          <a class="page-link" href="{% if page != current_page %}{% url 'gallerypage' num=page %}{% endif %}">{{ page }}</a>
+                        </li>
+                      {% endfor %}
+                  </ul>
+                </nav>
             </div>
         </div>
     </section>

@@ -1,7 +1,7 @@
 {
   "name": "GILE Admin",
   "short_name": "GILE",
-  "start_url": "http://94.155.240.35:8000/admin/",
+  "start_url": "https://gile.house/admin/",
   "display": "standalone",
   "icons": [{
     "src": "home/static/img/mobile_admin.png",

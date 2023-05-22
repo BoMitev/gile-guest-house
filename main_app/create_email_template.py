@@ -1,5 +1,3 @@
-from hotel_gile import settings
-
 HEAD = """
 <html lang="en"">
     <head>
@@ -79,7 +77,86 @@ HEAD = """
     </head>"""
 
 
-def create_email(reservation):
+def reject_email(reservation):
+    body = f"""
+        <body style="box-sizing: border-box; margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased;background-color:#f1f1f1; color:#000000;">
+  <table class="wrapper all-font-sans" width="100%" height="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center" style="padding: 24px;" width="100%">
+        <table class="sm-w-full" width="650" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td colspan="2" class="sm-inline-block" style="display: none;">
+              <img src="https://gile.house/media/room/4.jpg" width="600" alt="Double Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-top-right-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);">
+            </td>
+        </tr>
+        <tr>
+            <td class="sm-hidden" style="padding-top: 40px; padding-bottom: 40px;" width="160">
+              <img src="https://gile.house/media/room/4.jpg" alt="Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-bottom-left-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);" width="160" height="350">
+            </td>
+            <td align="left" class="sm-p-20 sm-dui17-b-t" style="border-radius: 2px; padding: 40px; position: relative; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05); vertical-align: top; z-index: 50;" bgcolor="#ffffff" valign="top">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td width="80%">
+                    <h1 class="sm-text-lg all-font-roboto" style="font-weight: 700; line-height: 100%; margin: 0; margin-bottom: 4px; font-size: 24px;">Здравей, {reservation.name.split()[0].title()}!</h1>
+                    <p class="sm-text-xs" style="margin: 0; color: #a0aec0; font-size: 14px;">Вашата резервация в къща за гости ГИЛЕ е отхвърлена!</p>
+                  </td>
+                </tr>
+              </table>
+              <div style="line-height: 24px;">&zwnj;</div>
+			  <p>Получихме вашата заявка за резервация на {reservation.check_in.date().strftime("%d.%m.%Y")}. Благодарим Ви, че желате да бъдете наши гости, но за този период нямаме останали свободни стаи.</p>
+			  <p>Ние оставаме на разположение за бъдещи ваши резервации.</p>
+
+			  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+				<tr>
+				  <td style="padding-top: 24px;padding-bottom: 5px;">
+					<div style="background-color: #edf2f7; height: 2px; line-height: 2px;">&zwnj;</div>
+				  </td>
+				</tr>
+				<tr>
+				<td colspan="2" style="line-height:12px; text-align: center;"><sub style="font-size: 12px;">Това е автоматично генерирано съобщение. Моля, не отговаряйте!</sub></td>
+				</tr>
+			  </table>
+            </td>
+        </tr>
+		<tr>
+            <td class="sm-hidden" style="padding-top: 40px; padding-bottom: 40px;" width="160">
+              <img src="https://i.ibb.co/ph7fvky/361616563.jpg" alt="Double room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-bottom-left-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);" width="160" height="350">
+            </td>
+            <td align="left" class="sm-p-20 sm-dui17-b-t" style="border-radius: 2px; padding: 40px; position: relative; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05); vertical-align: top; z-index: 50;" bgcolor="#ffffff" valign="top">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td width="80%">
+                    <h1 class="sm-text-lg all-font-roboto" style="font-weight: 700; line-height: 100%; margin: 0; margin-bottom: 4px; font-size: 24px;">Hi, {reservation.name.split()[0].title()}!</h1>
+                    <p class="sm-text-xs" style="margin: 0; color: #a0aec0; font-size: 14px;">Your reservation in guest house GILE has been rejected!</p>
+                  </td>
+                </tr>
+              </table>
+              <div style="line-height: 24px;">&zwnj;</div>
+				<p>We have received your request for a booking on {reservation.check_in.date().strftime("%d.%m.%Y")}. We are very pleased to know that you want a booking with us, however, we regret to inform you that we are no longer accepting the bookings of any type because we don’t have any extra room available in our hotel.</p>
+				<p>We are confident you will find the hotel to your total satisfaction.We remain at your service for any future bookings you might wish to make.</p>
+			  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+				<tr>
+				  <td style="padding-top: 24px;padding-bottom: 5px;">
+					<div style="background-color: #edf2f7; height: 2px; line-height: 2px;">&zwnj;</div>
+				  </td>
+				</tr>
+				<tr>
+				<td colspan="2" style="line-height:12px; text-align: center;"><sub style="font-size: 12px;">This is an automated notification email, please do not reply.</sub></td>
+				</tr>
+			  </table>
+              </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    """
+    return HEAD + body
+
+
+def confirm_email(reservation, rooms):
     body = f"""
     <body style="box-sizing: border-box; margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased;background-color:#f1f1f1; color:#000000;">
   <table class="wrapper all-font-sans" width="100%" height="100%" cellpadding="0" cellspacing="0" role="presentation">
@@ -88,18 +165,18 @@ def create_email(reservation):
         <table class="sm-w-full" width="650" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
             <td colspan="2" class="sm-inline-block" style="display: none;">
-              <img src="https://gile.house{reservation.room.image.url}" width="600" alt="Double Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-top-right-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);">
+              <img src="https://gile.house{rooms[0].room.image.url}" width="600" alt="Double Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-top-right-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);">
             </td>
           </tr>
           <tr>
             <td class="sm-hidden" style="padding-top: 40px; padding-bottom: 40px;" width="160">
-              <img src="https://gile.house{reservation.room.image.url}" alt="Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-bottom-left-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);" width="160" height="350">
+              <img src="https://gile.house{rooms[0].room.image.url}" alt="Room" style="object-fit: cover;border: 0; line-height: 100%; vertical-align: middle; border-top-left-radius: 4px; border-bottom-left-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);" width="160" height="350">
             </td>
             <td align="left" class="sm-p-20 sm-dui17-b-t" style="border-radius: 2px; padding: 40px; position: relative; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05); vertical-align: top; z-index: 50;" bgcolor="#ffffff" valign="top">
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
                   <td width="80%">
-                    <h1 class="sm-text-lg all-font-roboto" style="font-weight: 700; line-height: 100%; margin: 0; margin-bottom: 4px; font-size: 24px;">Здравей, {reservation.name.split()[0]}!</h1>
+                    <h1 class="sm-text-lg all-font-roboto" style="font-weight: 700; line-height: 100%; margin: 0; margin-bottom: 4px; font-size: 24px;">Здравей, {reservation.name.split()[0].title()}!</h1>
                     <p class="sm-text-xs" style="margin: 0; color: #a0aec0; font-size: 14px;">Вашата резервация в къща за гости ГИЛЕ е потвърдена!</p>
                   </td>
                 </tr>
@@ -120,8 +197,8 @@ def create_email(reservation):
                 </tr>
 				<tr>
                    <td class="sm-inline-block" width="100%">
-				    <span style="color: #718096; float:left; text-align:left;">Стая</span>
-				  <span style="font-weight: 600; text-align: right;float:right;">{reservation.room.room_title}</span>
+				    <span style="color: #718096; float:left; text-align:left;">{"Стаи" if len(rooms) > 1 else "Стая"}</span>
+				  <span style="font-weight: 600; text-align: right;float:right;">{', '.join(["№"+str(x.room.id) for x in rooms])}</span>
 				  </td>
                 </tr>
                 <tr>
@@ -139,15 +216,15 @@ def create_email(reservation):
               </table>
               <table style="font-size: 14px;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
-                  <td class="sm-w-full sm-inline-block sm-text-center" width="100%">
-					<span style="float:left; width:40%; text-align:left;">
+                  <td class="sm-w-full sm-inline-block sm-text-center" width="100%" style="text-align: center;">
+					<span style="float:left; text-align:left;">
                     <p class="all-font-roboto" style="margin: 0; margin-bottom: 4px; color: #a0aec0; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Настаняване</p>
-                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_in.date()}</p>
+                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_in.date().strftime("%d.%m.%Y")}</p>
 					</span>
 					 <span style="font-family: Menlo, Consolas, monospace; font-weight: 600; color: #cbd5e0; font-size: 18px; letter-spacing: -1px; width:2%">&gt;&gt;&gt;</span>
-				  <span style="float:right; width:40%; text-align:right">
+				  <span style="float:right; text-align:right">
                     <p class="all-font-roboto" style="margin: 0; margin-bottom: 4px; color: #a0aec0; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Напускане</p>
-                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_out.date()}</p>
+                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_out.date().strftime("%d.%m.%Y")}</p>
 					</span>
                   </td>
                 </tr>
@@ -162,7 +239,7 @@ def create_email(reservation):
               <table style="line-height: 28px; font-size: 14px;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
                   <td width="100%">
-				  <span style="color: #718096; float:left; text-align:left;">Цена на вечер за {reservation.total_guests} човека</span>
+				  <span style="color: #718096; float:left; text-align:left;">Цена на вечер за {sum([(room.adults+room.children) for room in rooms])} човека</span>
 				  <span style="font-weight: 600; text-align: right;float:right;">{reservation.price / reservation.calc_days} лв.</span>
 				  </td>
                 </tr>
@@ -234,7 +311,7 @@ def create_email(reservation):
                 <tr>
                   <td class="sm-inline-block"  width="100%">
 					<span style="color: #718096; float:left; text-align:left;">Guest</span>
-					<span style="font-weight: 600; text-align: right;float:right;">{reservation.name}</span>
+					<span style="font-weight: 600; text-align: right;float:right;">{reservation.name.title()}</span>
 				  </td>
                 </tr>
                 <tr>
@@ -245,8 +322,8 @@ def create_email(reservation):
                 </tr>
 				<tr>
                    <td class="sm-inline-block" width="100%">
-				    <span style="color: #718096; float:left; text-align:left;">Room</span>
-				  <span style="font-weight: 600; text-align: right;float:right;">{reservation.room.room_title_en}</span>
+				    <span style="color: #718096; float:left; text-align:left;">{"Rooms" if len(rooms) > 1 else "Room"}</span>
+				  <span style="font-weight: 600; text-align: right;float:right;">{', '.join(["№"+str(x.room.id) for x in rooms])}</span>
 				  </td>
                 </tr>
                 <tr>
@@ -264,15 +341,15 @@ def create_email(reservation):
               </table>
               <table style="font-size: 14px;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
-                  <td class="sm-w-full sm-inline-block sm-text-center" width="100%">
-					<span style="float:left; width:40%; text-align:left;">
+                  <td class="sm-w-full sm-inline-block sm-text-center" width="100%" style="text-align: center;">
+					<span style="float:left;text-align:left;">
                     <p class="all-font-roboto" style="margin: 0; margin-bottom: 4px; color: #a0aec0; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Check-in</p>
-                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_in.date()}</p>
+                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_in.date().strftime("%d.%m.%Y")}</p>
 					</span>
 					 <span style="font-family: Menlo, Consolas, monospace; font-weight: 600; color: #cbd5e0; font-size: 18px; letter-spacing: -1px; width:2%">&gt;&gt;&gt;</span>
-				  <span style="float:right; width:40%; text-align:right">
+				  <span style="float:right;text-align:right">
                     <p class="all-font-roboto" style="margin: 0; margin-bottom: 4px; color: #a0aec0; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Check-out</p>
-                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_out.date()}</p>
+                    <p class="all-font-roboto" style="font-weight: 600; margin: 0; color: #000000;">{reservation.check_out.date().strftime("%d.%m.%Y")}</p>
 					</span>
                   </td>
                 </tr>
@@ -287,7 +364,7 @@ def create_email(reservation):
               <table style="line-height: 28px; font-size: 14px;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
                   <td width="100%">
-				  <span style="color: #718096; float:left; text-align:left;">Price per night for {reservation.total_guests} guests</span>
+				  <span style="color: #718096; float:left; text-align:left;">Price per night for {sum([(room.adults+room.children) for room in rooms])} guests</span>
 				  <span style="font-weight: 600; text-align: right;float:right;">{reservation.price / reservation.calc_days} BGN</span>
 				  </td>
                 </tr>

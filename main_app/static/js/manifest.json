@@ -1,7 +1,7 @@
 {
   "name": "GILE Guest House",
   "short_name": "GILE Guest House",
-  "start_url": "http://94.155.240.35:8000/",
+  "start_url": "https://gile.house/",
   "display": "standalone",
   "icons": [{
     "src": "/static/img/mobile_favicon.png",

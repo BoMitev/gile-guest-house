@@ -82,43 +82,163 @@
                     </script>
                 {% endblock %}
 
-                {% if opts.model_name == "reservation" %}
-                    <script src="{% static 'js/jquery.min.js' %}"></script>
-                    <script type="text/javascript">
-                        $(document).ready(function () {
-                            $("#id_room, #id_check_in_0, #id_check_out_0, #id_adults, #id_children, #id_discount").focusout(function () {
-                                const room_val = $("#id_room").val() | 0;
-                                const check_in= $("#id_check_in_0").val();
-                                const check_out = $("#id_check_out_0").val();
-                                const adults = $("#id_adults").val() | 0;
-                                const children = $("#id_children").val() | 0;
-                                const discount_val = $("#id_discount").val();
-
-                                $.ajax(
-                                {
-                                    type: "GET",
-                                    url: "/admin/calc_price/",
-                                    data: {
-                                        room: room_val,
-                                        adults: adults,
-                                        children: children,
-                                        check_in: check_in,
-                                        check_out: check_out,
-                                        discount: discount_val
-                                    },
-                                    success: function (data) {
-                                        $('.readonly').last().text(data);
-                                    }
-                                })
-                            });
-                        });
-                    </script>
-
-                {% endif %}
-
                 {# JavaScript for prepopulated fields #}
                 {% prepopulated_fields_js %}
 
+                            {% if opts.model_name == "reservation" %}
+                    <script src="{% static 'js/jquery.min.js' %}"></script>
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            $("#id_check_in_0, #id_check_out_0").focusout(function () {
+                                const check_in = return_date($("#id_check_in_0").val());
+                                const check_out = return_date($("#id_check_out_0").val());
+                                if (check_in.getTime() >= check_out.getTime()) {
+                                    const new_check_out = new Date(new Date(check_in).setDate(check_in.getDate() + 1)).toLocaleDateString("fr-CH");
+                                    $("#id_check_out_0").val(new_check_out);
+                                }
+                                check_rooms();
+                            });
+
+                            $(".add-row > td > a").click(function() {
+                                check_rooms();
+                            });
+
+                            check_rooms();
+
+                            $(document).on('focusout', '[id^="id_reservedrooms_set-"],[id ="id_check_in_0"], [id ="id_check_out_0"]' ,function () {
+                                const parent = get_parent_element_id($(this).attr('id'));
+                                if (parent === "") {
+                                    $('[id^="id_reservedrooms_set-"][id $="room"]').each(function(){
+                                        const par = get_parent_element_id($(this).attr('id'));
+                                        get_price(par);
+                                    });
+                                } else {
+                                    get_price(parent);
+                                }
+                                calc_total_price();
+                            });
+
+                            $(document).on('click', '[class="inline-deletelink"]', function() {
+                                calc_total_price();
+                            });
+
+
+                        });
+
+                        function calc_total_price() {
+                            const total_price = $("div.field-price_currency > div > div.readonly");
+                            let total = 0.0;
+                            $('[class="field-admin_total_price"] > p').each(function(){
+                                const temp = get_currency_number($(this).text());
+                                if (!isNaN(temp)) {
+                                    total += temp
+                                }
+                            });
+                            total_price.text(total.toFixed(2) + ' лв.');
+                        }
+
+                        function get_price(parent) {
+                            const room = $("#" + parent + '-room').val() | 0;
+                            const adults = $('#' + parent + '-adults').val() | 0;
+                            const children = $('#' + parent + '-children').val() | 0;
+                            const discount = $('#' + parent + '-discount ').val();
+                            const check_in = $("#id_check_in_0").val();
+                            const check_out = $("#id_check_out_0").val();
+                            const general_parent = get_general_parent(parent);
+                            if (room > 0 && adults > 0) {
+                                $.ajax(
+                                {
+                                    type: "GET",
+                                    url: "/rest/calc_price/",
+                                    async: false,
+                                    data: {
+                                        room: room,
+                                        check_in: check_in,
+                                        check_out: check_out,
+                                        adults: adults,
+                                        children: children,
+                                        discount: discount
+                                    },
+                                    success: function (data) {
+                                        //const obj = jQuery.parseJSON(data);
+                                        const obj = data;
+                                        $('tr#' + general_parent + '> td.field-admin_price_per_night > p').text(obj['price_per_night']);
+                                        $('tr#' + general_parent + '> td.field-admin_total_price > p').text(obj['total']);
+                                    }
+                                })
+                            } else {
+                                $('tr#' + general_parent + '> td.field-admin_price_per_night > p').text('-');
+                                $('tr#' + general_parent + '> td.field-admin_total_price > p').text('-');
+                            }
+                        }
+
+                        function get_currency_number (price) {
+                            const array = price.split(" ");
+                            return parseFloat(array[0]);
+                        }
+
+                        function get_general_parent(id) {
+                            const array = id.split('_');
+                            array.shift();
+                            return array.join('_');
+                        }
+
+                        function get_parent_element_id(id) {
+                            const array = id.split('-');
+                            array.pop();
+                            return array.join('-');
+                        }
+
+                        function return_date(date){
+                            const date_array = date.split(".");
+                            return new Date(parseInt(date_array[2]), parseInt(date_array[1]) - 1, parseInt(date_array[0]));
+                        }
+
+                        function check_rooms() {
+                            const check_in = $("#id_check_in_0").val();
+                            const check_out = $("#id_check_out_0").val();
+                            $.ajax(
+                                {
+                                    type: "GET",
+                                    url: "/rest/check_rooms/",
+                                    async: false,
+                                    data: {
+                                        check_in: check_in,
+                                        check_out: check_out,
+                                        reservation: {% if original %}{{ original.id }}{% else %} 0 {% endif %}
+                                    },
+                                    success: function (data) {
+                                        //const obj = jQuery.parseJSON(data);
+                                        const obj = data;
+                                        const max = Object.keys(obj).length;
+                                        $('[name="reservedrooms_set-MAX_NUM_FORMS"]').val(max);
+                                        const current = $('[name="reservedrooms_set-TOTAL_FORMS"]');
+                                        const cur = current.val();
+                                        if (current.val() >= max) {
+                                            $(".add-row > td > a").css("display", "none");
+                                        }
+                                        if (max > 1) {
+                                            $(".add-row > td > a").css("display", "unset");
+                                        }
+
+                                        $('[id^="id_reservedrooms_set-"][id $="room"]').each(function() {
+                                            const element = $(this);
+                                            const prev =  element.val() | 0;
+                                            const prevValue = prev.toString();
+                                            element.empty();
+                                            element.append($('<option></option>').attr('value', '').text('---------'));
+                                            $.each(obj, function (key, value) {
+                                                element.append($('<option></option>').attr('value', key).text(value));
+                                                if (key === prevValue) {
+                                                    element.val(key);
+                                                }
+                                            });
+                                    });
+                                    }
+                                })
+                        }
+                    </script>
+                {% endif %}
             </div>
         </form>
     </div>

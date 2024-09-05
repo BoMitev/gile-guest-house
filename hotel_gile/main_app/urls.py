@@ -1,7 +1,8 @@
 from django.shortcuts import redirect
 from django.urls import path, re_path
 from django.views.static import serve
-from hotel_gile.main_app.views import change_session_language, rooms, contacts, gallery, home, view_404, privacy_policy, basic_terms
+from hotel_gile.main_app.views import change_session_language, rooms, contacts, gallery, home, view_404, privacy_policy, \
+    basic_terms, payment_logs, payment_methods
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -21,6 +22,9 @@ urlpatterns = [
     path('gallery/<int:num>', gallery, name='gallerypage'),
     path('privacy_policy/', privacy_policy, name='privacy_policy'),
     path('basic_terms/', basic_terms, name='basic_terms'),
+    path('payment_methods', payment_methods, name='payment_methods'),
+    path('logs/', payment_logs, name='logs'),
+    path('logs/<int:num>', payment_logs, name='logspage'),
     re_path(r'^.*/$', view_404)
 ]
 

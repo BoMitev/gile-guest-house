@@ -64,13 +64,26 @@
             width: 100% !important;
           }
         }
-      </style>
-      <style>
         @media (max-width: 600px) {
           .sm-dui17-b-t {
             border: solid #4299e1;
             border-width: 4px 0 0;
           }
+        }
+        .button {
+              display: inline-block;
+              outline: none;
+              cursor: pointer;
+              font-size: 16px;
+              line-height: 20px;
+              font-weight: 600;
+              border-radius: 30px;
+              padding: 14px 24px;
+              border: none;
+              transition: box-shadow 0.2s ease 0s, -ms-transform 0.1s ease 0s, -webkit-transform 0.1s ease 0s, transform 0.1s ease 0s;
+              background: linear-gradient(to right, rgb(230, 30, 77) 0%, rgb(227, 28, 95) 50%, rgb(215, 4, 102) 100%);
+              color: #fff;
+              text-decoration: none;
         }
       </style>
     </head>
@@ -159,13 +172,13 @@
                 <tr>
                   <td width="100%">
 				  <span style="color: #718096; float:left; text-align:left;">Цена на вечер за {{ person_count }} човека</span>
-				  <span style="font-weight: 600; text-align: right;float:right;">{{ price_per_night }} лв.</span>
+				  <span style="font-weight: 600; text-align: right;float:right;">{{ price_per_night|floatformat:2  }} лв.</span>
 				  </td>
                 </tr>
                 <tr>
 					 <td width="100%">
 					 <span style="font-weight: 600; padding-top: 32px; color: #000000; font-size: 20px;float:left; text-align:left;">Общо</span>
-					 <span style="font-weight: 600; padding-top: 32px; text-align: right;float:right; color: #68d391; font-size: 20px;">{{ reservation.price }} лв.</span>
+					 <span style="font-weight: 600; padding-top: 32px; text-align: right;float:right; color: #68d391; font-size: 20px;">{{ reservation.price|floatformat:2  }} лв.</span>
 					 </td>
                 </tr>
               </table>
@@ -176,6 +189,7 @@
           </td>
         </tr>
       </table>
+      {% if reservation.status == '1' %}
       <table style="line-height: 28px; font-size: 14px;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
         <tr>
           <td style="font-weight: bold;" colspan="2">Банкови детайли</td>
@@ -196,10 +210,13 @@
             <td style="color: #718096;">IBAN:</td>
             <td>BG27STSA93001525962185</td>
         </tr>
+            {% if reservation.payment_url %}
         <tr>
-
+          <td colspan="2" style="text-align: center;padding-top: 20px;"><a href="{{ reservation.payment_url }}" class="button">Плати сега</a></td>
         </tr>
+            {% endif %}
       </table>
+      {% endif %}
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
         <tr>
           <td style="padding-top: 24px;padding-bottom: 5px;">
@@ -287,13 +304,13 @@
                 <tr>
                   <td width="100%">
 				  <span style="color: #718096; float:left; text-align:left;">Price per night for {{ person_count }} guests</span>
-				  <span style="font-weight: 600; text-align: right;float:right;">{{ price_per_night }} BGN</span>
+				  <span style="font-weight: 600; text-align: right;float:right;">{{ price_per_night|floatformat:2  }} BGN</span>
 				  </td>
                 </tr>
                 <tr>
 					 <td width="100%">
 					 <span style="font-weight: 600; padding-top: 32px; color: #000000; font-size: 20px;float:left; text-align:left;">Total</span>
-					 <span style="font-weight: 600; padding-top: 32px; text-align: right;float:right; color: #68d391; font-size: 20px;">{reservation.price} BGN</span>
+					 <span style="font-weight: 600; padding-top: 32px; text-align: right;float:right; color: #68d391; font-size: 20px;">{{ reservation.price|floatformat:2  }} BGN</span>
 					 </td>
                 </tr>
               </table>
@@ -304,6 +321,7 @@
           </td>
         </tr>
       </table>
+        {% if reservation.status == '1' %}
       <table style="line-height: 28px; font-size: 14px;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
         <tr>
           <td style="font-weight: bold;" colspan="2">Bank Details</td>
@@ -324,7 +342,13 @@
             <td style="color: #718096;">IBAN:</td>
             <td>BG27STSA93001525962185</td>
         </tr>
+        {% if reservation.payment_url %}
+        <tr>
+          <td colspan="2" style="text-align: center;padding-top: 20px;"><a href="{{ reservation.payment_url }}" class="button">Pay now!</a></td>
+        </tr>
+        {% endif %}
       </table>
+            {% endif %}
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
         <tr>
           <td style="padding-top: 24px;padding-bottom: 5px;">

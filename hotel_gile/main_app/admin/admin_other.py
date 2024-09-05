@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.utils.html import format_html
-import hotel_gile.main_app.functions.auxiliary_functions as af
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from hotel_gile.main_app.models import TermWorkList, TermWorkListCol, HeroGallery, Contact, Reviews, Gallery
 
@@ -24,11 +23,11 @@ class TermWorkListAdmin(admin.ModelAdmin):
     list_display = ('language',)
     inlines = (TermWorkListColInlineAdmin,)
 
-    # def has_add_permission(self, request):
-    #     return False
-    #
-    # def has_delete_permission(self, request, obj=None):
-    #     return False
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(HeroGallery)
@@ -78,26 +77,10 @@ class ReviewsAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
-    @button(html_attrs={'style': 'background-color:#88FF88;color:black'}, label='Зареди отзиви')
+    @button(html_attrs={'style': 'background-color:#88FF88;color:black'}, label='Зареждане на последните 20 отзива от Booking')
     def load(self, request):
-        self.message_user(request, 'Зареждане на отзиви от Booking.com')
-        reviews, response = af.load_reviews()
-        if response == 200:
-            objects = [Reviews(review_id=review['review_id'],
-                               name=review['author']['name'],
-                               pros=review['pros'],
-                               cons=review['cons'],
-                               score=round(float(review['average_score']) * 2.5, 1),
-                               date=review['date'],
-                               check_in=review['stayed_room_info']['checkin'],
-                               check_out=review['stayed_room_info']['checkout'],
-                               room=review['stayed_room_info']['room_name']
-                               ) for review in reviews if review['pros']]
-
-            Reviews.objects.bulk_create(objects, update_conflicts=True, unique_fields=['review_id'],
-                                        update_fields=['name', 'pros', 'cons', 'score', 'date', 'check_in', 'check_out',
-                                                       'room'])
-
+        self.message_user(request, 'Успешно зареждане')
+        self.model.bulk_create_with_limit()
         return
 
     fieldsets = (

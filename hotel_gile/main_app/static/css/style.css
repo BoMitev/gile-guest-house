@@ -1420,6 +1420,7 @@ ol {
 
 .room-item .ri-text table tbody tr td.r-o {
 	width: 125px;
+	vertical-align: top;
 }
 
 .room-item .ri-text .primary-btn {

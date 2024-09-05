@@ -1,6 +1,6 @@
 from datetime import datetime
 from hotel_gile.main_app.models.enums import ReservationStatus
-from hotel_gile.main_app.services.google_srvcs import create_service
+from ..google_srvc.google_srvcs import create_service
 
 
 def event_template(reservation, rooms):
@@ -14,10 +14,10 @@ def event_template(reservation, rooms):
     for room in rooms:
         description.append(f'{room.title}\n'
                            f'{room.adults}+{room.clean_children()} човека\n'
-                           f'{room.stay} x {room.total_price/room.stay:.2f} = {room.total_price:.2f}лв.\n')
+                           f'{reservation.stay} x {room.total_price/reservation.stay: .2f} = {room.total_price: .2f}лв.\n')
 
     if reservation.status not in [ReservationStatus.PENDING, ReservationStatus.ACCEPTED]:
-        description.append(reservation.status)
+        description.append(reservation.get_status_display())
 
     description.append(f'{check_in_time}'
                        f'{reservation.description}')
@@ -41,13 +41,16 @@ def event_template(reservation, rooms):
 
 def send_update_reservation(reservation, rooms):
     if reservation.status is not ReservationStatus.PENDING:
-        service = create_service()
-        event = event_template(reservation, rooms)
-        if reservation.external_id:
-            service.events().update(calendarId='primary', eventId=reservation.external_id, body=event).execute()
-        else:
-            response = service.events().insert(calendarId='primary', body=event).execute()
-            reservation.external_id = response['id']
+        try:
+            service = create_service()
+            event = event_template(reservation, rooms)
+            if reservation.external_id:
+                service.events().update(calendarId='primary', eventId=reservation.external_id, body=event).execute()
+            else:
+                response = service.events().insert(calendarId='primary', body=event).execute()
+                reservation.external_id = response['id']
+        except Exception as ex:
+            print(ex)
 
 
 def delete_reservation(reservation):

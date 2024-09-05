@@ -10,13 +10,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', default=False)
+DEBUG = eval(os.getenv('DEBUG', 'false'))
+ENV = os.getenv('ENV')
 
 ALLOWED_HOSTS = ['*']
 
-SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', default=False)
-CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', default=False)
-SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', default=False)
+SESSION_COOKIE_SECURE = eval(os.getenv('SESSION_COOKIE_SECURE', 'false'))
+CSRF_COOKIE_SECURE = eval(os.getenv('CSRF_COOKIE_SECURE', 'false'))
+SECURE_SSL_REDIRECT = eval(os.getenv('SECURE_SSL_REDIRECT', 'false'))
 
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -36,12 +37,13 @@ THIRD_PARTY_APPS = [
 
 GILE_APPS = [
     "hotel_gile.main_app",
+    'corsheaders',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + GILE_APPS
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    #'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -85,6 +87,21 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'NAME': 'pelbg_gile',
+#         'ENGINE': 'mysql.connector.django',
+#         'HOST': '127.0.0.1',
+#         'PORT': 3306,
+#         'USER': 'pelbg_admin',
+#         'PASSWORD': 'ocOlK~}wRq(D',
+#         'OPTIONS': {
+#           'use_pure': True,
+#           'raise_on_warnings': False,
+#         },
+#     }
+# }
+
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -108,8 +125,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = os.getenv('LANGUAGE_CODE')
 TIME_ZONE = os.getenv('TIME_ZONE')
-USE_I18N = os.getenv('USE_I18N')
-USE_TZ = os.getenv('USE_TZ')
+USE_I18N = eval(os.getenv('USE_I18N', 'false'))
+USE_TZ = eval(os.getenv('USE_TZ', 'false'))
 
 # USE_L10N = True
 # Static files (CSS, JavaScript, Images)
@@ -140,13 +157,14 @@ EMAIL_PORT = 25
 ALTERNATIVE_USER = os.getenv('ALTERNATIVE_USER')
 EMAIL_SRVC_ENDPOINT = os.getenv('EMAIL_SRVC_ENDPOINT')
 
-# Tuya Locker
+# Tuya APi
 TUYA_ACCESS_ID = os.getenv('TUYA_ACCESS_ID')
 TUYA_ACCESS_KEY = os.getenv('TUYA_ACCESS_KEY')
 TUYA_API_ENDPOINT = os.getenv('TUYA_API_ENDPOINT')
 TUYA_DEVICE_ID = os.getenv('TUYA_DEVICE_ID')
 
 # Google APi
+SEND_TO_GOOGLE = eval(os.getenv('SEND_TO_GOOGLE', 'False'))
 GOOGLE_CLIENT_SECRET_FILE = os.getenv('GOOGLE_CLIENT_SECRET_FILE')
 GOOGLE_API_NAME = os.getenv('GOOGLE_API_NAME')
 GOOGLE_API_VERSION = os.getenv('GOOGLE_API_VERSION')
@@ -163,3 +181,9 @@ REVIEW_HEADERS = {
     "X-RapidAPI-Key": os.getenv('REVIEW_API_KEY'),
     "X-RapidAPI-Host": os.getenv('REVIEW_HOST')
 }
+
+# Payment APi
+PAYMENT_URL = os.getenv('PAYMENT_URL_'+ENV)
+PAYMENT_USER = os.getenv('PAYMENT_USER_'+ENV)
+PAYMENT_PASSWORD = os.getenv('PAYMENT_PASSWORD_'+ENV)
+FILTER_BODY_KEYS = ["token", "password", "userName"]

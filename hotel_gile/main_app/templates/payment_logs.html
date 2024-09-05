@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" >
+{% load static %}
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/jquery.json-viewer.js'%}"></script>
+	<link rel="stylesheet" href="{% static 'css/reset.min.css' %}" type="text/css" >
+	<link rel="stylesheet" href="{% static 'css/bootstrap.min.3.1.css' %}" type="text/css">
+	<link rel="stylesheet" href="{% static 'css/payments.css' %}" type="text/css">
+</head>
+<body>
+	<div class="col-md-12">
+    	<div class="panel panel-default">
+			<div class="panel-heading">
+				Logs
+			</div>
+			<div class="panel-body">
+				<table class="table table-condensed table-striped">
+					<thead>
+						<tr>
+							<th>Hostname</th>
+							<th>Status Code</th>
+							<th>Timestamp</th>
+						</tr>
+					</thead>
+					<tbody>
+                    {% for log in logs %}
+						<tr data-toggle="collapse" data-target="#demo{{ log.id }}" class="accordion-toggle">
+							<td>{{ log.host }}</td>
+							<td>{{ log.code }}</td>
+							<td>{{ log.created_at }}</td>
+						</tr>
+						<tr>
+							<td colspan="3">
+								<div class="accordian-body collapse" id="demo{{ log.id }}">
+									<section class="container panel panel-body panel-default">
+										<span>
+											<p>Request body:</p>
+											<pre id="json-renderer">{{ log.request_body }}</pre>
+										</span>
+										<span>
+											<p>Response body:</p>
+											<pre id="json-renderer">{{ log.response_body }}</pre>
+										</span>
+									</section>
+								</div>
+							</td>
+						</tr>
+                    {% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+<script src='{% static 'js/bootstrap.min.js' %}'></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils.safestring import mark_safe
 from hotel_gile.main_app.models.enums import LanguageEnum
+from hotel_gile.main_app.functions import auxiliary_func as af
 
 
 class HeroGallery(models.Model):
@@ -49,6 +50,36 @@ class Reviews(models.Model):
     check_in = models.DateField(verbose_name="Настанен")
     check_out = models.DateField(verbose_name="Напуснал")
     room = models.CharField(max_length=30, verbose_name="Стая")
+
+    @classmethod
+    def bulk_create_with_limit(cls):
+        reviews, response = af.load_reviews()
+        if response == 200:
+            objects = [Reviews(review_id=review['review_id'],
+                               name=review['author']['name'],
+                               pros=review['pros'],
+                               cons=review['cons'],
+                               score=round(float(review['average_score']) * 2.5, 1),
+                               date=review['date'],
+                               check_in=review['stayed_room_info']['checkin'],
+                               check_out=review['stayed_room_info']['checkout'],
+                               room=review['stayed_room_info']['room_name']
+                               ) for review in reviews if review['pros']]
+            with transaction.atomic():
+                # Bulk create or update the records
+                cls.objects.bulk_create(
+                    objects,
+                    update_conflicts=True,
+                    unique_fields=['review_id'],
+                    update_fields=['name', 'pros', 'cons', 'score', 'date', 'check_in', 'check_out', 'room']
+                )
+
+                # Ensure only 20 most recent records remain
+                total_records = cls.objects.count()
+                if total_records > 20:
+                    delete_count = total_records - 20
+                    ids_to_delete = cls.objects.order_by('date').values_list('review_id', flat=True)[:delete_count]
+                    cls.objects.filter(review_id__in=ids_to_delete).delete()
 
     @property
     def stars(self):

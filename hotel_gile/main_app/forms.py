@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import datetime
-import hotel_gile.main_app.functions.email_functions as email
+from hotel_gile.main_app.services.asi_srvc import asi_email
 from hotel_gile import settings
 from hotel_gile.main_app.models import Contact, Reservation, Room, ReservedRooms
 
@@ -72,8 +72,8 @@ class ReservationForm(forms.ModelForm):
         if (self.cleaned_data['adults'] + self.cleaned_data['children']) < self.cleaned_data['rooms']:
             raise ValidationError({"adults": ""})
 
-        email.send_notification_email(self)
-        email.send_client_notification_email(self)
+        asi_email.send_notification_email(self)
+        asi_email.send_client_notification_email(self)
 
     def clean_name(self):
         return self.cleaned_data['name'].title()
@@ -131,4 +131,4 @@ class ContactForm(forms.ModelForm):
         fields = "__all__"
 
     def clean(self):
-        email.send_notification_email(self)
+        asi_email.send_notification_email(self)

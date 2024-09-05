@@ -282,7 +282,6 @@ body.popup .submit-row {
 }
 
 .submit-row a.deletelink {
-    display: block;
     background: var(--delete-button-bg);
     border-radius: 4px;
     padding: 10px 15px;

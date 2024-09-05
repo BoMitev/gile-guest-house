@@ -6,7 +6,6 @@ def get_session_language(session):
 
     if 'language' not in session:
         session['language'] = lang_config.DEFAULT_LANGUAGE
-        session.save()
     return session.get('language')
 
 
@@ -45,3 +44,6 @@ def get_content_type_for_model(obj):
     return ContentType.objects.get_for_model(obj, for_concrete_model=False)
 
 
+def has_cyrillic(text):
+    import re
+    return bool(re.search('[а-яА-Я]', text))

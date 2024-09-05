@@ -109,6 +109,7 @@ class GoogleDriverHelper:
 
 
 def create_service():
-    from hotel_gile.settings import GOOGLE_CLIENT_SECRET_FILE, GOOGLE_API_NAME, GOOGLE_API_VERSION, GOOGLE_SCOPES
-    service = Create_Service(GOOGLE_CLIENT_SECRET_FILE, GOOGLE_API_NAME, GOOGLE_API_VERSION, GOOGLE_SCOPES)
-    return service
+    from hotel_gile.settings import GOOGLE_CLIENT_SECRET_FILE, GOOGLE_API_NAME, GOOGLE_API_VERSION, GOOGLE_SCOPES, SEND_TO_GOOGLE
+    if SEND_TO_GOOGLE:
+        service = Create_Service(GOOGLE_CLIENT_SECRET_FILE, GOOGLE_API_NAME, GOOGLE_API_VERSION, GOOGLE_SCOPES)
+        return service

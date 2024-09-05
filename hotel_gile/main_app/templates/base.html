@@ -45,16 +45,16 @@
 		<div class="header-configure-area">
             <div class="language-option">
 				{% if language == 'bg' %}
-				<img src="{% static 'img/flag_bg.jpg' %}" alt="">
+				<img src="{% static 'img/flag_bg.png' %}" alt="">
 				<span>{{ request.session.language }} <i class="fa fa-angle-down"></i></span>
 				<div class="flag-dropdown">
-						<a href="{% url 'change language' %}"><ul><li>EN</li></ul></a>
+						<a href="{% url 'change language' %}"><ul><li><img src="{% static 'img/flag.png' %}" alt="">EN</li></ul></a>
 				</div>
 				{% else %}
-				<img src="{% static 'img/flag.jpg' %}" alt="">
+				<img src="{% static 'img/flag.png' %}" alt="">
 				<span>{{ request.session.language }} <i class="fa fa-angle-down"></i></span>
 				<div class="flag-dropdown">
-						<a href="{% url 'change language' %}"><ul><li>BG</li></ul></a>
+						<a href="{% url 'change language' %}"><ul><li><img src="{% static 'img/flag_bg.png' %}" alt="">BG</li></ul></a>
 				</div>
 				{% endif %}
             </div>
@@ -72,8 +72,10 @@
         </nav>
         <div id="mobile-menu-wrap"></div>
         <div class="top-social">
-            <a href="{{ page_dynamics.facebook_url }}" target="_blank"><i class="fa fa-facebook"></i></a>
-            <a href="{{ page_dynamics.booking_url }}" target="_blank"><i class="fa fa-bookmark" aria-hidden="true"></i></a>
+            <a href="{{ page_dynamics.facebook_url }}" target="_blank"><i class="fa fa-facebook" style="color: #1877F2;"></i></a>
+            <a href="{{ page_dynamics.booking_url }}" target="_blank"><i class="fa-solid fa-b" aria-hidden="true" style="color: #003580;"></i></a>
+            <a href="viber://chat?number=%2B{{ page_dynamics.phone|cut:" "|cut:"+" }}"><i class="fa-brands fa-viber" style="color: #B197FC;"></i></a>
+            <a href="https://wa.me/{{ page_dynamics.phone|cut:" "|cut:"+"|cut:"("|cut:")" }}"><i class="fa-brands fa-whatsapp" style="color: #63E6BE;"></i></a>
         </div>
         <ul class="top-widget">
             <li><i class="fa fa-phone"></i><a href="tel:{{ page_dynamics.phone }}">{{ page_dynamics.phone }}</a></li>
@@ -94,21 +96,23 @@
                     <div class="col-lg-6">
                         <div class="tn-right">
                             <div class="top-social">
-                                <a href="{{ page_dynamics.facebook_url }}" target="_blank"><i class="fa fa-facebook"></i></a>
-                                <a href="{{ page_dynamics.booking_url }}" target="_blank"><i class="fa fa-bookmark" aria-hidden="true"></i></a>
+                                <a href="{{ page_dynamics.facebook_url }}" target="_blank"><i class="fa fa-facebook" style="color: #1877F2;"></i></a>
+                                <a href="{{ page_dynamics.booking_url }}" target="_blank"><i class="fa-solid fa-b" aria-hidden="true" style="color: #003580;"></i></a>
+                                <a href="viber://chat?number=%2B{{ page_dynamics.phone|cut:" "|cut:"+" }}"><i class="fa-brands fa-viber" style="color: #B197FC;"></i></a>
+                                <a href="https://wa.me/{{ page_dynamics.phone|cut:" "|cut:"+"|cut:"("|cut:")" }}"><i class="fa-brands fa-whatsapp" style="color: #63E6BE;"></i></a>
                             </div>
                             <div class="language-option">
 								{% if language == 'bg' %}
-								<img src="{% static 'img/flag_bg.jpg' %}" alt="">
+								<img src="{% static 'img/flag_bg.png' %}" alt="">
                                 <span>{{ request.session.language }} <i class="fa fa-angle-down"></i></span>
                                 <div class="flag-dropdown">
-                                        <a href="{% url 'change language' %}"><ul><li>EN</li></ul></a>
+                                        <a href="{% url 'change language' %}"><ul><li><img src="{% static 'img/flag.png' %}" alt="">EN</li></ul></a>
                                 </div>
 								{% else %}
-								<img src="{% static 'img/flag.jpg' %}" alt="">
+								<img src="{% static 'img/flag.png' %}" alt="">
                                 <span>{{ request.session.language }} <i class="fa fa-angle-down"></i></span>
                                 <div class="flag-dropdown">
-                                        <a href="{% url 'change language' %}"><ul><li>BG</li></ul></a>
+                                        <a href="{% url 'change language' %}"><ul><li><img src="{% static 'img/flag_bg.png' %}" alt="">BG</li></ul></a>
                                 </div>
 								{% endif %}
                             </div>
@@ -164,6 +168,7 @@
                             <p> {{ page_dynamics.footer_slogan }}</p>
                             <p>
                                 <a style="color:#aaaab3" href="{% url "basic_terms" %}">{{ page_statics.footer.basic_terms }}</a> <br>
+                                <a style="color:#aaaab3" href="{% url "payment_methods" %}">{{ page_statics.footer.payment_methods }}</a> <br>
                                 <a style="color:#aaaab3" href="{% url "privacy_policy" %}">{{ page_statics.footer.privacy_policy }}</a> <br>
                                 <a style="color:#aaaab3" href="https://docs.google.com/document/d/1Mh8pNNHeqeyDDnQOJxvYPtr299P7N-qasLAQkM4dlVs/edit?usp=sharing">{{ page_statics.footer.rules }}</a>
                             </p>

@@ -4,10 +4,11 @@ STATICS = {
         'title': 'Къща за гости ГИЛЕ',
         'footer': {
             'basic_terms': "Общи условия",
+            'payment_methods': "Методи за плащане",
             'privacy_policy': "Политика за поверителност",
             'rules': "Правила за ползване"
         },
-        'validations':{
+        'validations': {
             'check_out': 'Датата на настаняване трябва да е след датата на напускане.',
             'adults': 'Броят на гостите трябва да е по-голям от броят на стаите.',
             'email': 'Невалиден имейл адрес',
@@ -83,12 +84,23 @@ STATICS = {
                 'contact_info_text': "Имате въпроси? Моля, свържете се с нас. Ще отговорим на въпросите Ви възможно най-скоро. Просто попълнете формата и ни я изпратете.",
                 'contact_form': ['Име', 'Email', 'Вашето съобщение', 'Изпрати'],
             },
+            'payment_methods': {
+                'list': [
+                    'Плащане с дебитна/ кредитна карта през ВПОС-а на ДСК.',
+                    ' Видове карти, които се приемат: дебитни, кредитни и бизнес карти Visa и Mastеrcard',
+                    'Транзакциите се осъществяват посредством програмите за сигурност MasterCard Identity check и VISA Secure.',
+                    'От гледна точка на сигурност, максималната сума за плащане с карта е 8000,00 лева.',
+                    'Не съхраняваме данни за банковите карти, използвани за плащане чрез сайта.',
+                    'При необходимост от връщане на сума, платена с банкова карта, сумата се възстановява по картата, с която е извършено плащането.',
+                ],
+            }
         },
     },
     'en': {
         'title': 'GILE Guest House',
         'footer': {
             'basic_terms': "Basic Terms of Conditions",
+            'payment_methods': "Payment methods",
             'privacy_policy': "Privacy Policy",
             'rules': "Rules"
         },
@@ -166,6 +178,16 @@ STATICS = {
                 'contact_info': 'How can we help?',
                 'contact_info_text': 'You have questions? Please contact us at any time. We will reply to your query as soon as possible. Just fill out the contact form and submit it.',
                 'contact_form': ['Your name', 'Your Email', 'Your Message', 'Submit Now'],
+            },
+            'payment_methods': {
+                'list': [
+                    'Payment by debit/credit card through the Virtual POS of DSK Bank.',
+                    'Types of cards accepted: Visa and Mastercard debit, credit and business cards',
+                    'Transactions are made through MasterCard Identity check and VISA Secure security program.',
+                    'From the point of view of security, the maximum amount for card payment is BGN 8,000.00.',
+                    'We do not store details of the bank cards used for payment through the site.',
+                    'If it is necessary to return an amount paid with a bank card, the amount is refunded to the card with which the payment was made.',
+                ],
             }
         },
 

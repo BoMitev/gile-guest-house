@@ -273,7 +273,10 @@ class PaymentLogs(models.Model):
 
     @property
     def reservation_id(self):
-        return self.request_body['orderNumber'].split("-")[0]
+        order_number = self.request_body.get('orderNumber', None)
+        if order_number:
+            return order_number.split("-")[0]
+        return "Unknown"
 
     reservation_id.fget.short_description = "Резервация"
 

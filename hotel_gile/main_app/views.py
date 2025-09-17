@@ -76,6 +76,11 @@ def rooms(request):
                              values_list('column_ident', 'column_description')))
     rooms = Room.objects.all()
 
+    # Add euro prices to each room object
+    for room in rooms:
+        room.min_price_eur = room.min_price / 1.95583 if room.min_price else None
+        room.max_price_eur = room.max_price / 1.95583 if room.max_price else None
+
     context = {
         'page_title': lang_config.STATICS[language]['menu'][inspect.stack()[0][3]],
         'language': language,

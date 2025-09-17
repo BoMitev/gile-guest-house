@@ -29,11 +29,13 @@
                         <img src="{{ room.image.url }}" alt="">
                         <div class="ri-text">
                             {% if language == 'bg' %}
-                            <h4>{{ room.title }}</h4>
-                                <h3>{% if room.min_price < room.max_price %}<span>от </span>{{ room.min_price|floatformat:"0" }}<span> до </span>{% endif %}{{ room.max_price|floatformat:"0" }}<span> лв/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
+                                <h4>{{ room.title }}</h4>
+                                <h3>{% if room.min_price < room.max_price %}<span>от </span>{{ room.min_price|floatformat:"0" }}<span> лв. до </span>{% endif %}{{ room.max_price|floatformat:"0" }}<span> лв/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
+                                <h3>{% if room.min_price < room.max_price %}<span>от </span>{{ room.min_price_eur|floatformat:"2" }}<span> € до </span>{% endif %}{{ room.max_price_eur|floatformat:"2" }}<span> €/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
 								{% else %}
                                 <h4>{{ room.title_en }}</h4>
-                                <h3>{% if room.min_price < room.max_price %}<span>from </span>{{ room.min_price|floatformat:"0" }}<span> to </span>{% endif %}{{ room.max_price|floatformat:"0" }}<span> BGN/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
+                                <h3>{% if room.min_price < room.max_price %}<span>from </span>{{ room.min_price|floatformat:"0" }}<span> BGN to </span>{% endif %}{{ room.max_price|floatformat:"0" }}<span> BGN/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
+                                <h3>{% if room.min_price < room.max_price %}<span>from </span>{{ room.min_price_eur|floatformat:"2" }}<span> € to </span>{% endif %}{{ room.max_price_eur|floatformat:"2" }}<span> €/ {{ page_statics.page.rooms.rooms_terms.0 }}</span></h3>
 								{% endif %}
                              <table>
                                     <tbody>

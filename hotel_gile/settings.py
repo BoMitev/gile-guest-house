@@ -37,13 +37,12 @@ THIRD_PARTY_APPS = [
 
 GILE_APPS = [
     "hotel_gile.main_app",
-    'corsheaders',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + GILE_APPS
 
 MIDDLEWARE = [
-    #'django.middleware.security.SecurityMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -157,7 +156,7 @@ EMAIL_PORT = 25
 ALTERNATIVE_USER = os.getenv('ALTERNATIVE_USER')
 EMAIL_SRVC_ENDPOINT = os.getenv('EMAIL_SRVC_ENDPOINT')
 
-# Tuya APi
+# Tuya Locker
 TUYA_ACCESS_ID = os.getenv('TUYA_ACCESS_ID')
 TUYA_ACCESS_KEY = os.getenv('TUYA_ACCESS_KEY')
 TUYA_API_ENDPOINT = os.getenv('TUYA_API_ENDPOINT')

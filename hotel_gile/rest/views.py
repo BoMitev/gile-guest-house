@@ -7,11 +7,7 @@ from hotel_gile.main_app.models import Room, Reservation, ReservedRooms
 from hotel_gile.main_app.services import asi_payments
 from hotel_gile.rest.decorators import log_api_call
 from rest_framework.authentication import SessionAuthentication
-
-
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-    def enforce_csrf(self, request):
-        return
+from django.utils.decorators import method_decorator
 
 
 class CalcRoomPrice(APIView):
@@ -61,12 +57,12 @@ class CheckRoom(APIView):
         return Response(data=result, status=status.HTTP_200_OK)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class Payments(APIView):
-    authentication_classes = (CsrfExemptSessionAuthentication,)
 
     @log_api_call
-    def post(self, request):
-        payment_id = request.get("mdOrder", "")
+    def post(self, request, *args, **kwargs):
+        payment_id = request.data.get("mdOrder", "")
         reservation = Reservation.objects.filter(payment_id=payment_id).first()
 
         if reservation is None:

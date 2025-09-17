@@ -1,3 +1,4 @@
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,7 +7,6 @@ from datetime import datetime
 from hotel_gile.main_app.models import Room, Reservation, ReservedRooms
 from hotel_gile.main_app.services import asi_payments
 from hotel_gile.rest.decorators import log_api_call
-from rest_framework.authentication import SessionAuthentication
 from django.utils.decorators import method_decorator
 
 
@@ -62,7 +62,7 @@ class Payments(APIView):
 
     @log_api_call
     def post(self, request, *args, **kwargs):
-        payment_id = request.data.get("mdOrder", "")
+        payment_id = request.get("mdOrder", "")
         reservation = Reservation.objects.filter(payment_id=payment_id).first()
 
         if reservation is None:
